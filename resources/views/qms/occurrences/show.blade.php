@@ -44,15 +44,38 @@
       <p>{{ $occurrence->immediate_corrective_action ?: 'No immediate corrective action entered.' }}</p>
       <h3>Linked actions</h3>
       <ul class="timeline">@foreach ($actions as $action)<li><strong>{{ $action->reference }}</strong><span>{{ $action->title }} - {{ $action->status }}</span></li>@endforeach</ul>
+      <h3>Record notes</h3>
+      <ul class="timeline">
+        @forelse ($notes as $note)
+          <li><strong>{{ $note->author }}</strong><span>{{ $note->visibility }} - {{ $note->body }}</span></li>
+        @empty
+          <li><strong>No notes</strong><span>Add screening, investigation, or closure notes from the side panel.</span></li>
+        @endforelse
+      </ul>
+      <h3>Audit trail</h3>
+      <ul class="timeline">
+        @forelse ($auditLogs as $log)
+          <li><strong>{{ $log->action }}</strong><span>{{ $log->actor ?? 'System' }} - {{ $log->created_at->format('Y-m-d H:i') }}</span></li>
+        @empty
+          <li><strong>No audit entries</strong><span>Workflow updates and notes will be recorded here.</span></li>
+        @endforelse
+      </ul>
     </article>
     <aside class="panel">
       <h2>Workflow update</h2>
       <form method="POST" action="{{ route('occurrences.advance', $occurrence) }}">
         @csrf @method('PATCH')
-        <label>Stage<select name="workflow_stage"><option>HSE Review</option><option>Investigation</option><option>CAPA</option><option>Closed</option></select></label>
-        <label>Status<select name="status"><option>Submitted</option><option>Accepted</option><option>In progress</option><option>Closed</option></select></label>
-        <label>Risk<select name="risk_rating"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></label>
+        <label>Stage<select name="workflow_stage">@foreach (['HSE Review', 'Investigation', 'CAPA', 'Verification', 'Closed'] as $stage)<option @selected($occurrence->workflow_stage === $stage)>{{ $stage }}</option>@endforeach</select></label>
+        <label>Status<select name="status">@foreach (['Submitted', 'Accepted', 'In progress', 'Verification', 'Closed', 'Rejected'] as $status)<option @selected($occurrence->status === $status)>{{ $status }}</option>@endforeach</select></label>
+        <label>Risk<select name="risk_rating">@foreach (['Low', 'Medium', 'High', 'Critical'] as $risk)<option @selected($occurrence->risk_rating === $risk)>{{ $risk }}</option>@endforeach</select></label>
         <button class="primary-button full">Update</button>
+      </form>
+      <h2>Add note</h2>
+      <form method="POST" action="{{ route('occurrences.notes.store', $occurrence) }}">
+        @csrf
+        <label>Visibility<select name="visibility"><option>Internal</option><option>Reporter feedback</option><option>Confidential</option></select></label>
+        <label>Note<textarea name="body" rows="4" required placeholder="Add screening decision, follow-up, or closure note."></textarea></label>
+        <button class="secondary-button full">Add note</button>
       </form>
     </aside>
   </div>

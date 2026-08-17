@@ -23,6 +23,7 @@
         <a class="nav-item {{ request()->routeIs('audits.*') ? 'active' : '' }}" href="{{ route('audits.index') }}">Audits</a>
         <a class="nav-item {{ request()->routeIs('risks.*') ? 'active' : '' }}" href="{{ route('risks.index') }}">Risks</a>
         <a class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" href="{{ route('documents.index') }}">Documents</a>
+        <a class="nav-item {{ request()->routeIs('compliance.*') ? 'active' : '' }}" href="{{ route('compliance.index') }}">Compliance</a>
         <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>
       </nav>
       <div class="sidebar-footer">
@@ -35,8 +36,8 @@
       <header class="topbar">
         <div class="search">
           <span>Search</span>
-          <form action="{{ route('occurrences.index') }}" method="GET">
-            <input name="search" type="search" placeholder="Reports, actions, audits, risks..." value="{{ request('search') }}">
+          <form action="{{ route('search.index') }}" method="GET">
+            <input name="q" type="search" placeholder="Reports, actions, audits, risks..." value="{{ request('q', request('search')) }}">
           </form>
         </div>
         <div class="topbar-actions">

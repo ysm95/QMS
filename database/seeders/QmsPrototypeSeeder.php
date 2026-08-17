@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\QmsAction;
 use App\Models\QmsAudit;
+use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
 use App\Models\QmsInvestigation;
 use App\Models\QmsOccurrence;
+use App\Models\QmsRecordLink;
 use App\Models\QmsRisk;
 use Illuminate\Database\Seeder;
 
@@ -93,5 +95,60 @@ class QmsPrototypeSeeder extends Seeder
             'status' => 'Review',
             'review_date' => now()->addMonths(2)->toDateString(),
         ]);
+
+        QmsComplianceFramework::updateOrCreate(['code' => 'SMS-ICAO'], [
+            'name' => 'ICAO Safety Management System',
+            'owner' => 'Safety',
+            'status' => 'Active',
+            'requirements' => [
+                'Safety policy and objectives',
+                'Safety risk management',
+                'Safety assurance',
+                'Safety promotion',
+            ],
+        ]);
+
+        QmsComplianceFramework::updateOrCreate(['code' => 'ISO-9001'], [
+            'name' => 'ISO 9001 Quality Management',
+            'owner' => 'Quality',
+            'status' => 'Active',
+            'requirements' => [
+                'Context and interested parties',
+                'Leadership and accountability',
+                'Operational control',
+                'Performance evaluation',
+                'Improvement and corrective action',
+            ],
+        ]);
+
+        $occurrence = QmsOccurrence::where('reference', 'QMS-2026-00435')->first();
+        $action = QmsAction::where('reference', 'CAPA-2026-00077')->first();
+        $risk = QmsRisk::where('reference', 'RSK-2026-00031')->first();
+
+        if ($occurrence && $action) {
+            QmsRecordLink::updateOrCreate([
+                'source_type' => QmsOccurrence::class,
+                'source_id' => $occurrence->id,
+                'target_type' => QmsAction::class,
+                'target_id' => $action->id,
+            ], [
+                'relationship' => 'Generated CAPA',
+                'source_reference' => $occurrence->reference,
+                'target_reference' => $action->reference,
+            ]);
+        }
+
+        if ($occurrence && $risk) {
+            QmsRecordLink::updateOrCreate([
+                'source_type' => QmsOccurrence::class,
+                'source_id' => $occurrence->id,
+                'target_type' => QmsRisk::class,
+                'target_id' => $risk->id,
+            ], [
+                'relationship' => 'Risk signal',
+                'source_reference' => $occurrence->reference,
+                'target_reference' => $risk->reference,
+            ]);
+        }
     }
 }

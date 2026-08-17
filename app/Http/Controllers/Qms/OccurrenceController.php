@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Qms;
 
 use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
+use App\Models\QmsAuditLog;
 use App\Models\QmsLocation;
 use App\Models\QmsOccurrence;
+use App\Models\QmsRecordNote;
 use App\Models\User;
+use App\Support\QmsAuditTrail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Qms\ReportingController;
@@ -147,6 +150,12 @@ class OccurrenceController extends Controller
             'due_date' => now()->addDays(2)->toDateString(),
         ]);
 
+        QmsAuditTrail::record($request, $occurrence, 'submitted', [], [
+            'status' => $occurrence->status,
+            'workflow_stage' => $occurrence->workflow_stage,
+            'risk_rating' => $occurrence->risk_rating,
+        ], 'Occurrence submitted into QMS workflow.');
+
         return redirect()->route('occurrences.show', $occurrence)->with('status', 'Occurrence submitted to HSE Review.');
     }
 
@@ -155,6 +164,8 @@ class OccurrenceController extends Controller
         return view('qms.occurrences.show', [
             'occurrence' => $occurrence,
             'actions' => QmsAction::where('source_reference', $occurrence->reference)->latest()->get(),
+            'notes' => QmsRecordNote::where('record_type', QmsOccurrence::class)->where('record_id', $occurrence->id)->latest()->get(),
+            'auditLogs' => QmsAuditLog::where('auditable_type', QmsOccurrence::class)->where('auditable_id', $occurrence->id)->latest()->get(),
         ]);
     }
 
@@ -166,8 +177,33 @@ class OccurrenceController extends Controller
             'risk_rating' => ['required', 'string', 'max:40'],
         ]);
 
+        $oldValues = $occurrence->only(['workflow_stage', 'status', 'risk_rating']);
         $occurrence->update($data);
 
+        QmsAuditTrail::record($request, $occurrence, 'workflow_updated', $oldValues, $data, 'Workflow, status, or risk rating updated.');
+
         return back()->with('status', 'Workflow updated.');
+    }
+
+    public function storeNote(Request $request, QmsOccurrence $occurrence)
+    {
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:3000'],
+            'visibility' => ['required', 'string', 'max:80'],
+        ]);
+
+        QmsRecordNote::create([
+            'record_type' => QmsOccurrence::class,
+            'record_id' => $occurrence->id,
+            'reference' => $occurrence->reference,
+            'user_id' => $request->user()?->id,
+            'author' => $request->user()?->name ?? 'System',
+            'visibility' => $data['visibility'],
+            'body' => $data['body'],
+        ]);
+
+        QmsAuditTrail::record($request, $occurrence, 'note_added', [], ['visibility' => $data['visibility']], 'Record note added.');
+
+        return back()->with('status', 'Note added.');
     }
 }
