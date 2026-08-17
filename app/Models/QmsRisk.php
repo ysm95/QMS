@@ -7,4 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class QmsRisk extends Model
 {
     protected $guarded = [];
+
+    protected $casts = [
+        'review_date' => 'date',
+    ];
 }

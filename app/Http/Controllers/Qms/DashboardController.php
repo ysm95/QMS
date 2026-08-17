@@ -31,6 +31,7 @@ class DashboardController extends Controller
             'actions' => QmsAction::latest()->limit(6)->get(),
             'investigations' => QmsInvestigation::latest()->limit(4)->get(),
             'audits' => QmsAudit::latest()->limit(4)->get(),
+            'risks' => QmsRisk::latest()->limit(4)->get(),
             'documents' => QmsDocument::latest()->limit(4)->get(),
         ]);
     }

@@ -20,7 +20,10 @@
         <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
         <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
         <a class="nav-item {{ request()->routeIs('investigations.*') ? 'active' : '' }}" href="{{ route('investigations.index') }}">Investigations</a>
-        <a class="nav-item" href="{{ route('admin.index') }}">Admin Center</a>
+        <a class="nav-item {{ request()->routeIs('audits.*') ? 'active' : '' }}" href="{{ route('audits.index') }}">Audits</a>
+        <a class="nav-item {{ request()->routeIs('risks.*') ? 'active' : '' }}" href="{{ route('risks.index') }}">Risks</a>
+        <a class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" href="{{ route('documents.index') }}">Documents</a>
+        <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>
       </nav>
       <div class="sidebar-footer">
         <span>{{ auth()->user()->qms_role ?? 'QMS User' }}</span>

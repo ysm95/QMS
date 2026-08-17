@@ -21,17 +21,35 @@ class OccurrenceController extends Controller
             $query->where('status', $request->string('status'));
         }
 
+        if ($request->filled('stage')) {
+            $query->where('workflow_stage', $request->string('stage'));
+        }
+
+        if ($request->filled('risk')) {
+            $query->where('risk_rating', $request->string('risk'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->string('type'));
+        }
+
         if ($request->filled('search')) {
             $search = $request->string('search');
             $query->where(function ($builder) use ($search) {
                 $builder->where('reference', 'like', "%{$search}%")
                     ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('reported_by', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
         return view('qms.occurrences.index', [
             'occurrences' => $query->paginate(12)->withQueryString(),
+            'stages' => QmsOccurrence::select('workflow_stage')->distinct()->orderBy('workflow_stage')->pluck('workflow_stage'),
+            'risks' => QmsOccurrence::select('risk_rating')->distinct()->orderBy('risk_rating')->pluck('risk_rating'),
+            'types' => QmsOccurrence::select('type')->distinct()->orderBy('type')->pluck('type'),
         ]);
     }
 

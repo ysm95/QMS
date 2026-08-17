@@ -44,6 +44,33 @@
         <li><strong>SEC-001</strong><span>Authenticated access</span></li>
       </ul>
     </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Assurance queue</h2><a class="secondary-button" href="{{ route('audits.index') }}">Audits</a></div>
+      <ul class="timeline">
+        @foreach ($audits as $audit)
+          <li><strong>{{ $audit->reference }}</strong><span>{{ $audit->title }} - {{ $audit->status }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Risk watch</h2><a class="secondary-button" href="{{ route('risks.index') }}">Risks</a></div>
+      <ul class="timeline">
+        @foreach ($risks as $risk)
+          <li><strong>{{ $risk->rating }}</strong><span>{{ $risk->hazard }} - {{ $risk->owner }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Controlled documents</h2><a class="secondary-button" href="{{ route('documents.index') }}">Documents</a></div>
+      <ul class="timeline">
+        @foreach ($documents as $document)
+          <li><strong>{{ $document->reference }}</strong><span>{{ $document->title }} - {{ $document->status }}</span></li>
+        @endforeach
+      </ul>
+    </article>
   </div>
 </section>
 @endsection

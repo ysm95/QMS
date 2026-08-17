@@ -3,10 +3,13 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Qms\ActionController;
 use App\Http\Controllers\Qms\AdminController;
+use App\Http\Controllers\Qms\AuditController;
 use App\Http\Controllers\Qms\DashboardController;
+use App\Http\Controllers\Qms\DocumentController;
 use App\Http\Controllers\Qms\InvestigationController;
 use App\Http\Controllers\Qms\OccurrenceController;
 use App\Http\Controllers\Qms\ReportingController;
+use App\Http\Controllers\Qms\RiskController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -31,6 +34,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('investigations', [InvestigationController::class, 'index'])->name('investigations.index');
     Route::get('investigations/{investigation}', [InvestigationController::class, 'show'])->name('investigations.show');
+
+    Route::get('audits', [AuditController::class, 'index'])->name('audits.index');
+    Route::get('risks', [RiskController::class, 'index'])->name('risks.index');
+    Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
 
     Route::get('admin', [AdminController::class, 'index'])->name('admin.index');
 });

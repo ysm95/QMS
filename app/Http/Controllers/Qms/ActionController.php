@@ -8,10 +8,33 @@ use Illuminate\Http\Request;
 
 class ActionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = QmsAction::query()->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status'));
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->string('priority'));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('reference', 'like', "%{$search}%")
+                    ->orWhere('source_reference', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('owner', 'like', "%{$search}%")
+                    ->orWhere('evidence', 'like', "%{$search}%");
+            });
+        }
+
         return view('qms.actions.index', [
-            'actions' => QmsAction::latest()->paginate(14),
+            'actions' => $query->paginate(14)->withQueryString(),
+            'statuses' => QmsAction::select('status')->distinct()->orderBy('status')->pluck('status'),
+            'priorities' => QmsAction::select('priority')->distinct()->orderBy('priority')->pluck('priority'),
         ]);
     }
 
