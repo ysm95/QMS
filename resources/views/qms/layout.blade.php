@@ -16,6 +16,7 @@
       </div>
       <nav class="nav-list">
         <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
+        <a class="nav-item {{ request()->routeIs('intelligence.*') ? 'active' : '' }}" href="{{ route('intelligence.index') }}">Intelligence</a>
         <a class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}" href="{{ route('reporting.index') }}">Reporting</a>
         <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
         <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
@@ -28,6 +29,7 @@
         <a class="nav-item {{ request()->routeIs('management-reviews.*') ? 'active' : '' }}" href="{{ route('management-reviews.index') }}">Management Review</a>
         <a class="nav-item {{ request()->routeIs('training.*') ? 'active' : '' }}" href="{{ route('training.index') }}">Training</a>
         <a class="nav-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}" href="{{ route('suppliers.index') }}">Suppliers</a>
+        <a class="nav-item {{ request()->routeIs('platform.*') ? 'active' : '' }}" href="{{ route('platform.index') }}">Platform Config</a>
         <a class="nav-item {{ request()->routeIs('ai.*') ? 'active' : '' }}" href="{{ route('ai.index') }}">Controlled AI</a>
         <a class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">Notifications</a>
         <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>

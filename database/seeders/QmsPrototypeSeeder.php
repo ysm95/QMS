@@ -7,6 +7,7 @@ use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
+use App\Models\QmsFormDefinition;
 use App\Models\QmsInvestigation;
 use App\Models\QmsManagementReview;
 use App\Models\QmsNotification;
@@ -14,8 +15,10 @@ use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRecordLink;
 use App\Models\QmsRisk;
+use App\Models\QmsSavedView;
 use App\Models\QmsSupplier;
 use App\Models\QmsTrainingRecord;
+use App\Models\QmsWorkflowDefinition;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -246,6 +249,61 @@ class QmsPrototypeSeeder extends Seeder
             'is_approved' => false,
             'is_enabled' => false,
             'governance_notes' => 'AI remains blocked until legal, IT security, DPA, paid provider, and entity training controls are approved.',
+        ]);
+
+        QmsFormDefinition::updateOrCreate(['code' => 'FORM-DOR-001'], [
+            'name' => 'Dispatch Occurrence Report',
+            'version' => 1,
+            'module' => 'Occurrence',
+            'status' => 'Published',
+            'schema' => [
+                'required' => ['title', 'reported_by', 'event_date', 'location', 'description'],
+                'sections' => ['Header', 'Commander voyage details', 'Aircraft and flight details', 'Action taken'],
+                'conditional' => ['flight_fields_when' => 'aviation report type'],
+            ],
+            'change_note' => 'Initial BRSD/DOR-aligned controlled form definition.',
+        ]);
+
+        QmsFormDefinition::updateOrCreate(['code' => 'FORM-PUBLIC-001'], [
+            'name' => 'Public Safety Reporting Intake',
+            'version' => 1,
+            'module' => 'Public Portal',
+            'status' => 'Published',
+            'schema' => [
+                'required' => ['category', 'description'],
+                'supports' => ['anonymous', 'confidential'],
+            ],
+            'change_note' => 'Public voluntary/confidential intake form.',
+        ]);
+
+        QmsWorkflowDefinition::updateOrCreate(['code' => 'WF-OCC-001'], [
+            'name' => 'Occurrence to CAPA Closure',
+            'version' => 1,
+            'module' => 'Occurrence',
+            'status' => 'Published',
+            'stages' => ['Submitted', 'HSE Review', 'Investigation', 'CAPA', 'Verification', 'Closed'],
+            'rules' => [
+                'high_risk_requires_investigation' => true,
+                'closure_requires_action_verification' => true,
+                'confidential_identity_restricted' => true,
+            ],
+            'change_note' => 'Core SMS/QMS occurrence workflow.',
+        ]);
+
+        QmsWorkflowDefinition::updateOrCreate(['code' => 'WF-DOC-001'], [
+            'name' => 'Controlled Document Lifecycle',
+            'version' => 1,
+            'module' => 'Documents',
+            'status' => 'Published',
+            'stages' => ['Draft', 'Review', 'Approved', 'Published', 'Archived'],
+            'rules' => ['published_requires_version' => true, 'review_date_required' => true],
+            'change_note' => 'Documented information lifecycle.',
+        ]);
+
+        QmsSavedView::updateOrCreate(['name' => 'Executive high-risk watch', 'module' => 'Intelligence'], [
+            'owner' => 'QMS Administrator',
+            'filters' => ['risk' => ['High', 'Critical'], 'status' => ['Open', 'In progress']],
+            'shared' => true,
         ]);
     }
 }

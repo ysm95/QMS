@@ -10,10 +10,12 @@ use App\Http\Controllers\Qms\DashboardController;
 use App\Http\Controllers\Qms\DocumentController;
 use App\Http\Controllers\Qms\ExportController;
 use App\Http\Controllers\Qms\InvestigationController;
+use App\Http\Controllers\Qms\IntelligenceController;
 use App\Http\Controllers\Qms\NotificationController;
 use App\Http\Controllers\Qms\OccurrenceController;
 use App\Http\Controllers\Qms\ObjectiveController;
 use App\Http\Controllers\Qms\ManagementReviewController;
+use App\Http\Controllers\Qms\PlatformController;
 use App\Http\Controllers\Qms\PublicReportController;
 use App\Http\Controllers\Qms\ReportingController;
 use App\Http\Controllers\Qms\RiskController;
@@ -37,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('qms.dashboard.path');
     Route::get('/qms', DashboardController::class)->name('qms.index');
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
+    Route::get('intelligence', [IntelligenceController::class, 'index'])->name('intelligence.index');
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
@@ -66,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::get('management-reviews', [ManagementReviewController::class, 'index'])->name('management-reviews.index');
     Route::get('training', [TrainingController::class, 'index'])->name('training.index');
     Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('platform', [PlatformController::class, 'index'])->name('platform.index');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');
     Route::get('exports/risks', [ExportController::class, 'risks'])->name('exports.risks');
