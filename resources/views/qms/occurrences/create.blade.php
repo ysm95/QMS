@@ -7,6 +7,10 @@
   $defaultType = $selected['type'] ?? 'Unsafe condition';
   $defaultTitle = $selected['title'] ?? 'Occurrence Report';
   $defaultConfidential = ! empty($selected['confidential']);
+  $areas = ['A330 Fleet', 'B737 Fleet', 'B787 Fleet', 'A320 Fleet', 'CRB', 'Cabin Appearance', 'Cargo', 'Catering', 'Crew Accommodations', 'Engineering', 'GSEW', 'Ground Airport', 'HQ1', 'HQ2', 'Dispatch'];
+  $sectors = ['MCT', 'SLL', 'DXB', 'DOH', 'JED', 'RUH', 'BOM', 'DEL', 'LHR', 'BKK'];
+  $aircraftTypes = ['A330', 'B737', 'B787', 'A320', 'B737 MAX', 'B787-9'];
+  $flightPhases = ['Pre-Flight', 'Towing', 'Pushback', 'Taxi-out', 'Take-off', 'RTO', 'Climb - Initial', 'Climb', 'Cruise', 'Descent', 'Holding', 'Approach', 'Landing'];
 @endphp
 <section class="view active-view">
   <div class="page-title">
@@ -32,19 +36,34 @@
             @endforeach
           </select>
         </label>
-        <label>Event title<input name="event_title" data-preview="eventTitle" placeholder="Short event title" required></label>
-        <label>Area / fleet<input name="area_fleet" data-preview="areaFleet" placeholder="Dispatch, B737, Ramp, Station..."></label>
+        <label>Title<input name="event_title" data-preview="eventTitle" placeholder="Short event title" required></label>
+        <label>Reported by<input name="reported_by" list="userPicker" data-preview="reportedBy" value="{{ auth()->user()->name }}" placeholder="Search user by %text%" required></label>
         <label>Event date<input type="date" name="event_date" data-preview="eventDate" value="{{ now()->toDateString() }}"></label>
-        <label>Location
-          <select name="location" data-preview="location" required>
-            @foreach ($locations as $location)<option>{{ $location->name }}</option>@endforeach
-          </select>
-        </label>
+        <label>Location<input name="location" list="locationPicker" data-preview="location" placeholder="Search location by %text%" required></label>
+        <label>Area / fleet<input name="area_fleet" list="areaFleetPicker" data-preview="areaFleet" placeholder="Search area or fleet by %text%"></label>
         <label>Exact location<input name="exact_location" data-preview="exactLocation" placeholder="Example: OCC desk, bay, ramp, aircraft stand"></label>
-        <label>Reported by<input name="reported_by" data-preview="reportedBy" value="{{ auth()->user()->name }}" required></label>
         <label>Confidential report<select name="confidential"><option value="0" @selected(! $defaultConfidential)>No</option><option value="1" @selected($defaultConfidential)>Yes</option></select></label>
         <label>MOR required<select name="mor"><option value="0">No</option><option value="1">Yes</option></select></label>
       </div>
+
+      <datalist id="userPicker">
+        @foreach ($users as $user)
+          <option value="{{ $user->name }} - {{ $user->email }}"></option>
+        @endforeach
+      </datalist>
+      <datalist id="locationPicker">
+        @foreach ($locations as $location)<option value="{{ $location->name }}"></option>@endforeach
+        @foreach (['OCC', 'Ramp', 'Station', 'Aircraft stand', 'Head Office', 'Hangar'] as $location)<option value="{{ $location }}"></option>@endforeach
+      </datalist>
+      <datalist id="areaFleetPicker">
+        @foreach ($areas as $area)<option value="{{ $area }}"></option>@endforeach
+      </datalist>
+      <datalist id="sectorPicker">
+        @foreach ($sectors as $sector)<option value="{{ $sector }}"></option>@endforeach
+      </datalist>
+      <datalist id="aircraftTypePicker">
+        @foreach ($aircraftTypes as $aircraftType)<option value="{{ $aircraftType }}"></option>@endforeach
+      </datalist>
 
       <fieldset class="checkbox-grid dor-checkboxes">
         <legend>Type of event</legend>
@@ -53,22 +72,37 @@
         @endforeach
       </fieldset>
 
+      <div class="conditional-box visible">
+        <h3>Commander voyage details</h3>
+        <div class="form-grid">
+          <label>Pilot name<input name="pilot_name" list="userPicker" placeholder="Search pilot by %text%"></label>
+          <label>Sector to<input name="sector_to" list="sectorPicker" placeholder="Select sector"></label>
+          <label>Sector diverted<input name="sector_diverted" list="sectorPicker" placeholder="Select sector if diverted"></label>
+        </div>
+        <fieldset class="checkbox-grid dor-checkboxes compact-checks">
+          <legend>Flight phase</legend>
+          @foreach ($flightPhases as $phase)
+            <label><input type="checkbox" name="event_categories[]" value="Flight phase: {{ $phase }}"> {{ $phase }}</label>
+          @endforeach
+        </fieldset>
+      </div>
+
       <div id="flightFields" class="conditional-box visible">
         <h3>Aircraft and flight details</h3>
         <div class="form-grid">
-          <label>Aircraft type<input name="aircraft_type" placeholder="B737 / B787 / A330"></label>
-          <label>Aircraft registration<input name="aircraft_registration" placeholder="A4O-..."></label>
+          <label>A/C type<input name="aircraft_type" list="aircraftTypePicker" placeholder="Search aircraft type"></label>
+          <label>A/C registration<input name="aircraft_registration" placeholder="A4O-..."></label>
           <label>Flight number<input name="flight_number" placeholder="WY123"></label>
-          <label>Time of occurrence<input type="time" name="time_of_occurrence"></label>
+          <label>Time of occurrence (UTC)<input type="time" name="time_of_occurrence"></label>
           <label>Flight cancelled<select name="flight_cancelled"><option value="0">No</option><option value="1">Yes</option></select></label>
         </div>
       </div>
 
       <h2>Personnel involved</h2>
       <div class="form-grid">
-        <label>Staff 1<input name="personnel_involved[staff_1]" placeholder="Name or staff number"></label>
+        <label>Staff 1<input name="personnel_involved[staff_1]" list="userPicker" placeholder="Search user by %text%"></label>
         <label>Staff 1 license/permit<input name="personnel_involved[staff_1_license]" placeholder="License / permit no."></label>
-        <label>Staff 2<input name="personnel_involved[staff_2]" placeholder="Name or staff number"></label>
+        <label>Staff 2<input name="personnel_involved[staff_2]" list="userPicker" placeholder="Search user by %text%"></label>
         <label>Staff 2 license/permit<input name="personnel_involved[staff_2_license]" placeholder="License / permit no."></label>
       </div>
 
@@ -95,7 +129,7 @@
         <div><span>Event title</span><strong data-preview-output="eventTitle">Not entered</strong></div>
         <div><span>Area / fleet</span><strong data-preview-output="areaFleet">Not entered</strong></div>
         <div><span>Date</span><strong data-preview-output="eventDate">{{ now()->toDateString() }}</strong></div>
-        <div><span>Location</span><strong data-preview-output="location">OQB Locations</strong></div>
+        <div><span>Location</span><strong data-preview-output="location">Not entered</strong></div>
         <div><span>Exact location</span><strong data-preview-output="exactLocation">Not entered</strong></div>
         <div><span>Reported by</span><strong data-preview-output="reportedBy">{{ auth()->user()->name }}</strong></div>
         <div class="preview-wide"><span>Summary</span><p data-preview-output="summary">Complete the summary to preview the report before submission.</p></div>

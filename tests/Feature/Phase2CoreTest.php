@@ -47,13 +47,16 @@ class Phase2CoreTest extends TestCase
             'event_title' => 'Dispatch fuel planning concern',
             'event_date' => now()->toDateString(),
             'area_fleet' => 'Dispatch / B737',
+            'sector_to' => 'DXB',
+            'sector_diverted' => 'MCT',
             'location' => 'OQB Locations',
             'exact_location' => 'Ramp area',
             'reported_by' => 'Yahya Al Naaimi',
+            'pilot_name' => 'Mazin Al Farsi',
             'description' => 'A test occurrence with enough operational detail for screening.',
             'confidential' => 0,
             'mor' => 1,
-            'event_categories' => ['Flight Planning', 'Fuel'],
+            'event_categories' => ['Flight Planning', 'Fuel', 'Flight phase: Cruise'],
             'aircraft_type' => 'B737',
             'aircraft_registration' => 'A4O-TEST',
             'flight_number' => 'WY123',
@@ -68,8 +71,25 @@ class Phase2CoreTest extends TestCase
             'type' => 'Dispatch occurrence',
             'workflow_stage' => 'HSE Review',
             'event_title' => 'Dispatch fuel planning concern',
+            'sector_to' => 'DXB',
+            'sector_diverted' => 'MCT',
+            'pilot_name' => 'Mazin Al Farsi',
         ]);
         $this->assertSame(2, QmsOccurrence::count());
+    }
+
+    public function test_commander_form_has_searchable_reference_fields(): void
+    {
+        $this->seed();
+        $this->actingAs(User::where('email', 'admin@qms.test')->first());
+
+        $this->get('/occurrences/create?report_type=commander-voyage')
+            ->assertOk()
+            ->assertSee('Search user by %text%', false)
+            ->assertSee('Pilot name')
+            ->assertSee('Sector to')
+            ->assertSee('Flight phase')
+            ->assertSee('A330 Fleet');
     }
 
     public function test_reporting_catalogue_loads(): void

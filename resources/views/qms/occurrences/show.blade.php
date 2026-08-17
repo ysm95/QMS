@@ -17,9 +17,12 @@
       <div class="detail-grid">
         <div><span>Type</span><strong>{{ $occurrence->type }}</strong></div>
         <div><span>Area / fleet</span><strong>{{ $occurrence->area_fleet ?? 'Not set' }}</strong></div>
+        <div><span>Sector to</span><strong>{{ $occurrence->sector_to ?? 'Not set' }}</strong></div>
+        <div><span>Sector diverted</span><strong>{{ $occurrence->sector_diverted ?? 'Not set' }}</strong></div>
         <div><span>Location</span><strong>{{ $occurrence->location }}</strong></div>
         <div><span>Event date</span><strong>{{ optional($occurrence->event_date)->format('Y-m-d') ?? 'Not set' }}</strong></div>
         <div><span>Reporter</span><strong>{{ $occurrence->reported_by }}</strong></div>
+        <div><span>Pilot</span><strong>{{ $occurrence->pilot_name ?? 'Not set' }}</strong></div>
         <div><span>Status</span><strong>{{ $occurrence->status }}</strong></div>
         <div><span>Confidential</span><strong>{{ $occurrence->confidential ? 'Yes' : 'No' }}</strong></div>
         <div><span>MOR</span><strong>{{ $occurrence->mor ? 'Yes' : 'No' }}</strong></div>

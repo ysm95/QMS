@@ -52,3 +52,8 @@ td input, td select { min-width: 150px; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
 .tag-row span { padding: 6px 10px; border-radius: 999px; background: #e7f4ff; color: var(--primary-dark); font-weight: 800; font-size: 12px; }
 @media (max-width: 920px) { .reporting-frame, .dor-form-layout { grid-template-columns: 1fr; } .mobile-menu-panel { display: none; } .report-type-row { grid-template-columns: 72px minmax(0, 1fr); } .report-logo { width: 58px; height: 58px; font-size: 22px; } .report-type-row em { grid-column: 2; justify-self: start; } .sync-bar { left: 0; } }
+
+
+.dor-checkboxes label { min-height: 34px; }
+.compact-checks { margin-top: 14px; }
+input[list]::-webkit-calendar-picker-indicator { opacity: .75; cursor: pointer; }

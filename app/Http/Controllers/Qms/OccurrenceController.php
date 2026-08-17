@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
 use App\Models\QmsLocation;
 use App\Models\QmsOccurrence;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Qms\ReportingController;
@@ -45,6 +46,7 @@ class OccurrenceController extends Controller
 
         return view('qms.occurrences.create', [
             'locations' => QmsLocation::where('active', true)->orderBy('name')->get(),
+            'users' => User::where('is_active', true)->orderBy('name')->get(),
             'reportTypes' => $reportTypes,
             'selectedReportKey' => $selectedReportKey,
             'selectedReportType' => $reportTypes[$selectedReportKey],
@@ -59,9 +61,12 @@ class OccurrenceController extends Controller
             'event_title' => ['nullable', 'string', 'max:180'],
             'event_date' => ['nullable', 'date'],
             'area_fleet' => ['nullable', 'string', 'max:160'],
+            'sector_to' => ['nullable', 'string', 'max:80'],
+            'sector_diverted' => ['nullable', 'string', 'max:80'],
             'location' => ['required', 'string', 'max:160'],
             'exact_location' => ['nullable', 'string', 'max:255'],
             'reported_by' => ['required', 'string', 'max:160'],
+            'pilot_name' => ['nullable', 'string', 'max:160'],
             'description' => ['required', 'string', 'max:5000'],
             'confidential' => ['nullable', 'boolean'],
             'mor' => ['nullable', 'boolean'],
@@ -87,9 +92,12 @@ class OccurrenceController extends Controller
             'event_title' => $data['event_title'] ?? null,
             'type' => $data['type'],
             'area_fleet' => $data['area_fleet'] ?? null,
+            'sector_to' => $data['sector_to'] ?? null,
+            'sector_diverted' => $data['sector_diverted'] ?? null,
             'location' => $data['location'],
             'exact_location' => $data['exact_location'] ?? null,
             'reported_by' => $data['reported_by'],
+            'pilot_name' => $data['pilot_name'] ?? null,
             'description' => $data['description'],
             'flight_plan_details' => $data['flight_plan_details'] ?? null,
             'action_taken' => $data['action_taken'] ?? [],
