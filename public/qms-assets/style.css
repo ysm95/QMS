@@ -410,20 +410,6 @@ h3 {
   font-size: 24px;
   color: var(--primary);
 }
-
-.reference-strip {
-  display: grid;
-  gap: 10px;
-}
-
-.reference-strip img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-}
-
 .workflow-ribbon {
   display: flex;
   flex-wrap: wrap;
@@ -837,4 +823,34 @@ th {
   .checkbox-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.coverage-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.coverage-list li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbfd;
+}
+
+.coverage-list strong {
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.coverage-list span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
 }

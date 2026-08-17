@@ -120,15 +120,18 @@
             </ul>
           </article>
 
-          <article class="panel">
+                    <article class="panel">
             <div class="panel-header">
-              <h2>Reference screens</h2>
+              <h2>BRSD coverage</h2>
+              <span class="status-pill success">Prototype</span>
             </div>
-            <div class="reference-strip">
-              <img src="qms-assets/references/IMG_3381.png" alt="Reference workflow form screen" />
-              <img src="qms-assets/references/IMG_3386.png" alt="Reference record review screen" />
-              <img src="qms-assets/references/IMG_3387.png" alt="Reference detail form screen" />
-            </div>
+            <ul class="coverage-list">
+              <li><strong>FR-001</strong><span>Structured occurrence form with conditional flight-safety section</span></li>
+              <li><strong>FR-002</strong><span>Visible workflow path from draft to closure</span></li>
+              <li><strong>SMS-001</strong><span>Safety occurrence and hazard reporting foundation</span></li>
+              <li><strong>UX-003</strong><span>Record workspace with status, risk, owner, actions, and timeline</span></li>
+              <li><strong>SEC-001</strong><span>Future permission model prepared around record and workflow access</span></li>
+            </ul>
           </article>
         </div>
       </section>

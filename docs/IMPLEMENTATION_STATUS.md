@@ -1,12 +1,12 @@
 # QMS Implementation Status
 
-This Laravel prototype is aligned to the BRSD in `docs/QMS_ysaidea_BRSD_and_Architecture_Blueprint.md`.
+This Laravel prototype is aligned to and now visibly mapped against the BRSD in `docs/QMS_ysaidea_BRSD_and_Architecture_Blueprint.md`.
 
 Implemented in the current prototype:
 
 - Laravel QMS application shell
 - QMS dashboard route at `/dashboard`
-- QMS prototype Blade UI using the reference screens
+- QMS prototype Blade UI rebuilt from the BRSD form, workflow, record-workspace, and dashboard requirements
 - QMS occurrence submission endpoint
 - SQLite prototype database
 - QMS occurrence, action, investigation, audit, risk, and document models
