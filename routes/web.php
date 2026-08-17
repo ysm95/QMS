@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Qms\ActionController;
 use App\Http\Controllers\Qms\AdminController;
+use App\Http\Controllers\Qms\AiController;
 use App\Http\Controllers\Qms\AuditController;
 use App\Http\Controllers\Qms\ComplianceController;
 use App\Http\Controllers\Qms\DashboardController;
@@ -51,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::patch('documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
     Route::get('compliance', [ComplianceController::class, 'index'])->name('compliance.index');
+    Route::get('ai', [AiController::class, 'index'])->name('ai.index');
+    Route::post('ai/request-review', [AiController::class, 'requestReview'])->name('ai.request-review');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');
     Route::get('exports/risks', [ExportController::class, 'risks'])->name('exports.risks');

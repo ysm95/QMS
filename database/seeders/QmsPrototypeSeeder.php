@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\QmsAction;
+use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
@@ -170,6 +171,17 @@ class QmsPrototypeSeeder extends Seeder
             'user_id' => $admin?->id,
             'body' => 'Contractor HSE Manual is in review status.',
             'read_at' => null,
+        ]);
+
+        QmsAiProvider::updateOrCreate(['name' => 'Entity Secure AI - Pending Approval'], [
+            'provider_type' => 'Paid secured enterprise API',
+            'model_name' => 'Entity-trained controlled model',
+            'training_scope' => 'Entity-trained approved QMS/SMS knowledge only',
+            'security_tier' => 'Paid secured enterprise',
+            'data_residency' => 'Contract-controlled hosting region',
+            'is_approved' => false,
+            'is_enabled' => false,
+            'governance_notes' => 'AI remains blocked until legal, IT security, DPA, paid provider, and entity training controls are approved.',
         ]);
     }
 }
