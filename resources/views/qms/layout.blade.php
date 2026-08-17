@@ -24,6 +24,10 @@
         <a class="nav-item {{ request()->routeIs('risks.*') ? 'active' : '' }}" href="{{ route('risks.index') }}">Risks</a>
         <a class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" href="{{ route('documents.index') }}">Documents</a>
         <a class="nav-item {{ request()->routeIs('compliance.*') ? 'active' : '' }}" href="{{ route('compliance.index') }}">Compliance</a>
+        <a class="nav-item {{ request()->routeIs('objectives.*') ? 'active' : '' }}" href="{{ route('objectives.index') }}">Objectives / SPI</a>
+        <a class="nav-item {{ request()->routeIs('management-reviews.*') ? 'active' : '' }}" href="{{ route('management-reviews.index') }}">Management Review</a>
+        <a class="nav-item {{ request()->routeIs('training.*') ? 'active' : '' }}" href="{{ route('training.index') }}">Training</a>
+        <a class="nav-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}" href="{{ route('suppliers.index') }}">Suppliers</a>
         <a class="nav-item {{ request()->routeIs('ai.*') ? 'active' : '' }}" href="{{ route('ai.index') }}">Controlled AI</a>
         <a class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">Notifications</a>
         <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>

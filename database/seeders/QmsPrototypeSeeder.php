@@ -8,10 +8,14 @@ use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
 use App\Models\QmsInvestigation;
+use App\Models\QmsManagementReview;
 use App\Models\QmsNotification;
+use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRecordLink;
 use App\Models\QmsRisk;
+use App\Models\QmsSupplier;
+use App\Models\QmsTrainingRecord;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -97,6 +101,66 @@ class QmsPrototypeSeeder extends Seeder
             'owner' => 'HSE',
             'status' => 'Review',
             'review_date' => now()->addMonths(2)->toDateString(),
+        ]);
+
+        QmsObjective::updateOrCreate(['reference' => 'OBJ-2026-00001'], [
+            'title' => 'Reduce overdue CAPA actions',
+            'owner' => 'Quality',
+            'measure' => 'Overdue actions at month end',
+            'target' => '<= 2 overdue actions',
+            'current_value' => '1 overdue action',
+            'period' => 'Monthly',
+            'status' => 'On track',
+            'review_date' => now()->addMonth()->toDateString(),
+        ]);
+
+        QmsObjective::updateOrCreate(['reference' => 'SPI-2026-00002'], [
+            'title' => 'Improve voluntary safety reporting',
+            'owner' => 'Safety',
+            'measure' => 'Voluntary reports per quarter',
+            'target' => '>= 12 reports',
+            'current_value' => '8 reports',
+            'period' => 'Quarterly',
+            'status' => 'Watch',
+            'review_date' => now()->addWeeks(3)->toDateString(),
+        ]);
+
+        QmsManagementReview::updateOrCreate(['reference' => 'MR-2026-00001'], [
+            'title' => 'Q3 QMS/SMS Management Review',
+            'chair' => 'QMS Administrator',
+            'meeting_date' => now()->addWeeks(4)->toDateString(),
+            'status' => 'Planned',
+            'inputs' => ['Audit results', 'CAPA performance', 'Risk register', 'Training status', 'Supplier performance'],
+            'decisions' => 'Agenda prepared for leadership review.',
+            'actions_summary' => 'Actions will be assigned after review.',
+        ]);
+
+        QmsTrainingRecord::updateOrCreate(['reference' => 'TRN-2026-00044'], [
+            'person_name' => 'Omar Al Harthy',
+            'course' => 'Contractor HSE Induction',
+            'competency_area' => 'HSE awareness',
+            'completed_on' => now()->subMonth()->toDateString(),
+            'expires_on' => now()->addMonths(11)->toDateString(),
+            'status' => 'Current',
+        ]);
+
+        QmsTrainingRecord::updateOrCreate(['reference' => 'TRN-2026-00045'], [
+            'person_name' => 'Mazin Al Farsi',
+            'course' => 'Internal Auditor Refresher',
+            'competency_area' => 'Audit',
+            'completed_on' => now()->subMonths(10)->toDateString(),
+            'expires_on' => now()->addMonth()->toDateString(),
+            'status' => 'Expiring soon',
+        ]);
+
+        QmsSupplier::updateOrCreate(['reference' => 'SUP-2026-00012'], [
+            'name' => 'Training Engineering LLC',
+            'category' => 'Contractor',
+            'owner' => 'Engineering',
+            'risk_rating' => 'High',
+            'status' => 'Approved with controls',
+            'next_review_date' => now()->addMonth()->toDateString(),
+            'notes' => 'Supplier linked to contractor HSE and work-area control monitoring.',
         ]);
 
         QmsComplianceFramework::updateOrCreate(['code' => 'SMS-ICAO'], [

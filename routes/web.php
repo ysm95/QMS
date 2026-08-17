@@ -12,9 +12,14 @@ use App\Http\Controllers\Qms\ExportController;
 use App\Http\Controllers\Qms\InvestigationController;
 use App\Http\Controllers\Qms\NotificationController;
 use App\Http\Controllers\Qms\OccurrenceController;
+use App\Http\Controllers\Qms\ObjectiveController;
+use App\Http\Controllers\Qms\ManagementReviewController;
+use App\Http\Controllers\Qms\PublicReportController;
 use App\Http\Controllers\Qms\ReportingController;
 use App\Http\Controllers\Qms\RiskController;
 use App\Http\Controllers\Qms\SearchController;
+use App\Http\Controllers\Qms\SupplierController;
+use App\Http\Controllers\Qms\TrainingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -23,6 +28,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+Route::get('/portal/report', [PublicReportController::class, 'create'])->name('portal.report');
+Route::post('/portal/report', [PublicReportController::class, 'store'])->name('portal.report.store');
 
 Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('qms.dashboard');
@@ -54,6 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::get('compliance', [ComplianceController::class, 'index'])->name('compliance.index');
     Route::get('ai', [AiController::class, 'index'])->name('ai.index');
     Route::post('ai/request-review', [AiController::class, 'requestReview'])->name('ai.request-review');
+    Route::get('objectives', [ObjectiveController::class, 'index'])->name('objectives.index');
+    Route::get('management-reviews', [ManagementReviewController::class, 'index'])->name('management-reviews.index');
+    Route::get('training', [TrainingController::class, 'index'])->name('training.index');
+    Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');
     Route::get('exports/risks', [ExportController::class, 'risks'])->name('exports.risks');

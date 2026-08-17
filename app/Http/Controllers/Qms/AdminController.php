@@ -8,8 +8,12 @@ use App\Models\QmsAudit;
 use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsLocation;
+use App\Models\QmsManagementReview;
+use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRisk;
+use App\Models\QmsSupplier;
+use App\Models\QmsTrainingRecord;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -39,6 +43,10 @@ class AdminController extends Controller
                 'Audits' => QmsAudit::count(),
                 'Risks' => QmsRisk::count(),
                 'Documents' => QmsDocument::count(),
+                'Objectives' => QmsObjective::count(),
+                'Reviews' => QmsManagementReview::count(),
+                'Training' => QmsTrainingRecord::count(),
+                'Suppliers' => QmsSupplier::count(),
             ],
         ]);
     }
