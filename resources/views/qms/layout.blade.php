@@ -16,6 +16,7 @@
       </div>
       <nav class="nav-list">
         <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
+        <a class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}" href="{{ route('reporting.index') }}">Reporting</a>
         <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
         <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
         <a class="nav-item {{ request()->routeIs('investigations.*') ? 'active' : '' }}" href="{{ route('investigations.index') }}">Investigations</a>
@@ -36,7 +37,7 @@
           </form>
         </div>
         <div class="topbar-actions">
-          <a class="primary-button" href="{{ route('occurrences.create') }}">Submit</a>
+          <a class="primary-button" href="{{ route('reporting.index') }}">New report</a>
           <form method="POST" action="{{ route('logout') }}">@csrf<button class="secondary-button">Logout</button></form>
         </div>
       </header>

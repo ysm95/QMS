@@ -16,10 +16,29 @@
       </div>
       <div class="detail-grid">
         <div><span>Type</span><strong>{{ $occurrence->type }}</strong></div>
+        <div><span>Area / fleet</span><strong>{{ $occurrence->area_fleet ?? 'Not set' }}</strong></div>
         <div><span>Location</span><strong>{{ $occurrence->location }}</strong></div>
+        <div><span>Event date</span><strong>{{ optional($occurrence->event_date)->format('Y-m-d') ?? 'Not set' }}</strong></div>
         <div><span>Reporter</span><strong>{{ $occurrence->reported_by }}</strong></div>
         <div><span>Status</span><strong>{{ $occurrence->status }}</strong></div>
+        <div><span>Confidential</span><strong>{{ $occurrence->confidential ? 'Yes' : 'No' }}</strong></div>
+        <div><span>MOR</span><strong>{{ $occurrence->mor ? 'Yes' : 'No' }}</strong></div>
       </div>
+      @if ($occurrence->event_categories)
+        <h3>Type of event</h3>
+        <div class="tag-row">@foreach ($occurrence->event_categories as $category)<span>{{ $category }}</span>@endforeach</div>
+      @endif
+      <h3>Aircraft and flight details</h3>
+      <div class="detail-grid">
+        <div><span>A/C type</span><strong>{{ $occurrence->aircraft_type ?? 'Not set' }}</strong></div>
+        <div><span>A/C registration</span><strong>{{ $occurrence->aircraft_registration ?? 'Not set' }}</strong></div>
+        <div><span>Flight number</span><strong>{{ $occurrence->flight_number ?? 'Not set' }}</strong></div>
+        <div><span>Occurrence time</span><strong>{{ $occurrence->time_of_occurrence ?? 'Not set' }}</strong></div>
+      </div>
+      <h3>Flight plan details</h3>
+      <p>{{ $occurrence->flight_plan_details ?: 'No flight plan details entered.' }}</p>
+      <h3>Immediate corrective action</h3>
+      <p>{{ $occurrence->immediate_corrective_action ?: 'No immediate corrective action entered.' }}</p>
       <h3>Linked actions</h3>
       <ul class="timeline">@foreach ($actions as $action)<li><strong>{{ $action->reference }}</strong><span>{{ $action->title }} - {{ $action->status }}</span></li>@endforeach</ul>
     </article>

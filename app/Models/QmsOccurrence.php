@@ -10,6 +10,12 @@ class QmsOccurrence extends Model
 
     protected $casts = [
         'confidential' => 'boolean',
+        'mor' => 'boolean',
+        'flight_cancelled' => 'boolean',
+        'event_categories' => 'array',
+        'personnel_involved' => 'array',
+        'action_taken' => 'array',
+        'event_date' => 'date',
         'reported_at' => 'datetime',
     ];
 }

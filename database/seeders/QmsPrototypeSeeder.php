@@ -15,9 +15,12 @@ class QmsPrototypeSeeder extends Seeder
     public function run(): void
     {
         QmsOccurrence::updateOrCreate(['reference' => 'QMS-2026-00435'], [
+            'report_key' => 'ground-occurrence',
             'title' => 'Unsafe condition near scaffolding',
-            'type' => 'Unsafe condition',
+            'event_title' => 'Unsafe condition near scaffolding',
+            'type' => 'Ground safety',
             'location' => 'OQB Locations',
+            'area_fleet' => 'Engineering / Ground Operations',
             'exact_location' => 'CAE 135 equipment area',
             'reported_by' => 'Mazin Al Farsi',
             'description' => 'A rusted pipe was observed and there was no signage displayed in an area where scaffolding erection was in progress.',
@@ -25,6 +28,18 @@ class QmsPrototypeSeeder extends Seeder
             'workflow_stage' => 'HSE Review',
             'risk_rating' => 'High',
             'confidential' => false,
+            'mor' => false,
+            'event_categories' => ['Compliance / Regulatory', 'Human Factors'],
+            'aircraft_type' => null,
+            'aircraft_registration' => null,
+            'flight_number' => null,
+            'flight_cancelled' => false,
+            'personnel_involved' => ['staff_1' => 'Contractor employee'],
+            'flight_plan_details' => null,
+            'action_taken' => ['Informed supervisor'],
+            'immediate_corrective_action' => 'Advised crew to display signage and barricade the area.',
+            'feedback_to_reporter' => 'HSE review initiated.',
+            'event_date' => now()->toDateString(),
             'reported_at' => now(),
         ]);
 
