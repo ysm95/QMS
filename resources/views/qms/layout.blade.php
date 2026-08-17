@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ $title ?? 'QMS' }}</title>
+  <link rel="stylesheet" href="{{ asset('qms-assets/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('qms-assets/phase2.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">Q</div>
+        <div><strong>QMS</strong><span>qms.ysaidea.com</span></div>
+      </div>
+      <nav class="nav-list">
+        <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
+        <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
+        <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
+        <a class="nav-item {{ request()->routeIs('investigations.*') ? 'active' : '' }}" href="{{ route('investigations.index') }}">Investigations</a>
+        <a class="nav-item" href="{{ route('admin.index') }}">Admin Center</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span>{{ auth()->user()->qms_role ?? 'QMS User' }}</span>
+        <strong>{{ auth()->user()->name ?? 'Guest' }}</strong>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <span>Search</span>
+          <form action="{{ route('occurrences.index') }}" method="GET">
+            <input name="search" type="search" placeholder="Reports, actions, audits, risks..." value="{{ request('search') }}">
+          </form>
+        </div>
+        <div class="topbar-actions">
+          <a class="primary-button" href="{{ route('occurrences.create') }}">Submit</a>
+          <form method="POST" action="{{ route('logout') }}">@csrf<button class="secondary-button">Logout</button></form>
+        </div>
+      </header>
+
+      @if (session('status'))
+        <div class="server-flash">{{ session('status') }}</div>
+      @endif
+
+      @yield('content')
+    </main>
+  </div>
+</body>
+</html>
