@@ -36,9 +36,11 @@ class SeededUsersTest extends TestCase
     {
         $this->seed();
 
+        $this->actingAs(User::where('email', 'admin@qms.test')->first());
+
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee('Command dashboard')
-            ->assertSee('Submit occurrence');
+            ->assertSee('New occurrence');
     }
 }

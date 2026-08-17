@@ -76,7 +76,7 @@ class OccurrenceController extends Controller
             'due_date' => now()->addDays(2)->toDateString(),
         ]);
 
-        return redirect()->route('qms.occurrences.show', $occurrence)->with('status', 'Occurrence submitted to HSE Review.');
+        return redirect()->route('occurrences.show', $occurrence)->with('status', 'Occurrence submitted to HSE Review.');
     }
 
     public function show(QmsOccurrence $occurrence)
