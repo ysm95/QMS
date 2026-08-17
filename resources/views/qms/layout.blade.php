@@ -24,6 +24,7 @@
         <a class="nav-item {{ request()->routeIs('risks.*') ? 'active' : '' }}" href="{{ route('risks.index') }}">Risks</a>
         <a class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" href="{{ route('documents.index') }}">Documents</a>
         <a class="nav-item {{ request()->routeIs('compliance.*') ? 'active' : '' }}" href="{{ route('compliance.index') }}">Compliance</a>
+        <a class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">Notifications</a>
         <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>
       </nav>
       <div class="sidebar-footer">
@@ -41,6 +42,7 @@
           </form>
         </div>
         <div class="topbar-actions">
+          <a class="secondary-button" href="{{ route('notifications.index', ['status' => 'unread']) }}">Inbox</a>
           <a class="primary-button" href="{{ route('reporting.index') }}">New report</a>
           <form method="POST" action="{{ route('logout') }}">@csrf<button class="secondary-button">Logout</button></form>
         </div>

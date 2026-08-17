@@ -2,7 +2,7 @@
 
 @section('content')
 <section class="view active-view">
-  <div class="page-title"><div><p class="eyebrow">CAPA</p><h1>Actions</h1></div></div>
+  <div class="page-title"><div><p class="eyebrow">CAPA</p><h1>Actions</h1></div><a class="secondary-button" href="{{ route('exports.actions') }}">Export CSV</a></div>
 
   <form class="filter-bar" method="GET" action="{{ route('actions.index') }}">
     <input name="search" type="search" value="{{ request('search') }}" placeholder="Search action by %text%, owner, evidence, source">

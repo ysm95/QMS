@@ -4,7 +4,7 @@
 <section class="view active-view">
   <div class="page-title">
     <div><p class="eyebrow">Occurrence management</p><h1>Records</h1></div>
-    <a class="primary-button" href="{{ route('occurrences.create') }}">Submit occurrence</a>
+    <div class="button-row"><a class="secondary-button" href="{{ route('exports.occurrences') }}">Export CSV</a><a class="primary-button" href="{{ route('occurrences.create') }}">Submit occurrence</a></div>
   </div>
 
   <form class="filter-bar" method="GET" action="{{ route('occurrences.index') }}">

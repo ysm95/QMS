@@ -7,9 +7,11 @@ use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
 use App\Models\QmsInvestigation;
+use App\Models\QmsNotification;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRecordLink;
 use App\Models\QmsRisk;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class QmsPrototypeSeeder extends Seeder
@@ -150,5 +152,24 @@ class QmsPrototypeSeeder extends Seeder
                 'target_reference' => $risk->reference,
             ]);
         }
+
+        $admin = User::where('email', 'admin@qms.test')->first();
+        QmsNotification::updateOrCreate([
+            'title' => 'HSE review required',
+            'source_reference' => 'QMS-2026-00435',
+        ], [
+            'user_id' => $admin?->id,
+            'body' => 'Ground safety occurrence is waiting for screening and assignment.',
+            'read_at' => null,
+        ]);
+
+        QmsNotification::updateOrCreate([
+            'title' => 'Document review due',
+            'source_reference' => 'DOC-HSE-001',
+        ], [
+            'user_id' => $admin?->id,
+            'body' => 'Contractor HSE Manual is in review status.',
+            'read_at' => null,
+        ]);
     }
 }

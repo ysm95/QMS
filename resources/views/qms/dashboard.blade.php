@@ -15,6 +15,7 @@
     <article class="metric"><span>Overdue CAPA</span><strong>{{ $metrics['overdueActions'] }}</strong><small>Owner action queue</small></article>
     <article class="metric"><span>High risks</span><strong>{{ $metrics['highRisks'] }}</strong><small>Risk register</small></article>
     <article class="metric"><span>Audit readiness</span><strong>{{ $metrics['auditReadiness'] }}%</strong><small>BRSD evidence mapping</small></article>
+    <article class="metric"><span>Unread alerts</span><strong>{{ $metrics['unreadNotifications'] }}</strong><small>Notification inbox</small></article>
   </div>
 
   <div class="content-grid">
@@ -68,6 +69,15 @@
       <ul class="timeline">
         @foreach ($documents as $document)
           <li><strong>{{ $document->reference }}</strong><span>{{ $document->title }} - {{ $document->status }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Notifications</h2><a class="secondary-button" href="{{ route('notifications.index') }}">Inbox</a></div>
+      <ul class="timeline">
+        @foreach ($notifications as $notification)
+          <li><strong>{{ $notification->title }}</strong><span>{{ $notification->source_reference ?? 'QMS' }} - {{ $notification->created_at->format('Y-m-d H:i') }}</span></li>
         @endforeach
       </ul>
     </article>

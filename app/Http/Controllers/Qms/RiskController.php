@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Qms;
 
 use App\Http\Controllers\Controller;
 use App\Models\QmsRisk;
+use App\Support\QmsAuditTrail;
+use App\Support\QmsNotify;
 use Illuminate\Http\Request;
 
 class RiskController extends Controller
@@ -30,5 +32,22 @@ class RiskController extends Controller
             'risks' => $query->paginate(12)->withQueryString(),
             'ratings' => QmsRisk::select('rating')->distinct()->orderBy('rating')->pluck('rating'),
         ]);
+    }
+
+    public function update(Request $request, QmsRisk $risk)
+    {
+        $data = $request->validate([
+            'rating' => ['required', 'string', 'max:80'],
+            'controls' => ['nullable', 'string', 'max:5000'],
+            'review_date' => ['nullable', 'date'],
+        ]);
+
+        $oldValues = $risk->only(['rating', 'controls', 'review_date']);
+        $risk->update($data);
+
+        QmsAuditTrail::record($request, $risk, 'risk_updated', $oldValues, $data, 'Risk rating, controls, or review date updated.');
+        QmsNotify::everyone('Risk register updated', $risk->reference . ' is now rated ' . $risk->rating . '.', $risk->reference);
+
+        return back()->with('status', 'Risk updated.');
     }
 }

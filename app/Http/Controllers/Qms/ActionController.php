@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Qms;
 
 use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
+use App\Support\QmsAuditTrail;
+use App\Support\QmsNotify;
 use Illuminate\Http\Request;
 
 class ActionController extends Controller
@@ -40,10 +42,19 @@ class ActionController extends Controller
 
     public function update(Request $request, QmsAction $action)
     {
-        $action->update($request->validate([
+        $data = $request->validate([
             'status' => ['required', 'string', 'max:80'],
             'evidence' => ['nullable', 'string', 'max:3000'],
-        ]));
+        ]);
+
+        $oldValues = $action->only(['status', 'evidence']);
+        $action->update($data);
+
+        QmsAuditTrail::record($request, $action, 'action_updated', $oldValues, $data, 'CAPA action status or evidence updated.');
+
+        if (in_array($action->status, ['Verification', 'Closed', 'Verified'], true)) {
+            QmsNotify::everyone('CAPA action updated', $action->reference . ' moved to ' . $action->status . '.', $action->reference);
+        }
 
         return back()->with('status', 'Action updated.');
     }

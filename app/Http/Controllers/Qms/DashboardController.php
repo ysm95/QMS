@@ -9,6 +9,7 @@ use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsInvestigation;
 use App\Models\QmsLocation;
+use App\Models\QmsNotification;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRisk;
 use App\Models\User;
@@ -26,6 +27,7 @@ class DashboardController extends Controller
                 'users' => User::count(),
                 'departments' => QmsDepartment::count(),
                 'locations' => QmsLocation::count(),
+                'unreadNotifications' => QmsNotification::whereNull('read_at')->count(),
             ],
             'occurrences' => QmsOccurrence::latest()->limit(6)->get(),
             'actions' => QmsAction::latest()->limit(6)->get(),
@@ -33,6 +35,7 @@ class DashboardController extends Controller
             'audits' => QmsAudit::latest()->limit(4)->get(),
             'risks' => QmsRisk::latest()->limit(4)->get(),
             'documents' => QmsDocument::latest()->limit(4)->get(),
+            'notifications' => QmsNotification::latest()->limit(5)->get(),
         ]);
     }
 }
