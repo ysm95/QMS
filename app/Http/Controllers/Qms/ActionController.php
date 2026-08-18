@@ -45,9 +45,27 @@ class ActionController extends Controller
         $data = $request->validate([
             'status' => ['required', 'string', 'max:80'],
             'evidence' => ['nullable', 'string', 'max:3000'],
+            'progress' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'verification_note' => ['nullable', 'string', 'max:3000'],
+            'effectiveness_review' => ['nullable', 'string', 'max:3000'],
         ]);
 
-        $oldValues = $action->only(['status', 'evidence']);
+        $oldValues = $action->only(['status', 'evidence', 'progress', 'verification_note', 'effectiveness_review']);
+        $data['progress'] = $data['progress'] ?? $action->progress;
+
+        if ($data['status'] === 'Accepted' && ! $action->accepted_at) {
+            $data['accepted_at'] = now();
+        }
+        if ($data['status'] === 'Evidence Submitted' && ! $action->completed_at) {
+            $data['completed_at'] = now();
+        }
+        if (in_array($data['status'], ['Verification', 'Verified'], true) && ! $action->verified_at) {
+            $data['verified_at'] = now();
+        }
+        if (in_array($data['status'], ['Closed', 'Verified'], true) && ! $action->closed_at) {
+            $data['closed_at'] = now();
+        }
+
         $action->update($data);
 
         QmsAuditTrail::record($request, $action, 'action_updated', $oldValues, $data, 'CAPA action status or evidence updated.');

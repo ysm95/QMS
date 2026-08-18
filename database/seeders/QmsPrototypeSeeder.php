@@ -3,18 +3,26 @@
 namespace Database\Seeders;
 
 use App\Models\QmsAction;
+use App\Models\QmsAccessScope;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsDocument;
+use App\Models\QmsEmailDesign;
 use App\Models\QmsFormDefinition;
 use App\Models\QmsInvestigation;
+use App\Models\QmsKeyUserAssignment;
 use App\Models\QmsManagementReview;
 use App\Models\QmsNotification;
 use App\Models\QmsNotificationDesign;
+use App\Models\QmsNotificationGroup;
+use App\Models\QmsNotificationRule;
+use App\Models\QmsNotificationTemplate;
 use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
+use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecordLink;
+use App\Models\QmsRecommendation;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSavedView;
@@ -60,19 +68,36 @@ class QmsPrototypeSeeder extends Seeder
         QmsAction::updateOrCreate(['reference' => 'CAPA-2026-00077'], [
             'source_reference' => 'QMS-2026-00435',
             'title' => 'Revise barricade control checklist',
+            'description' => 'Review barricade checklist and update contractor controls for scaffolding zones.',
+            'required_outcome' => 'Updated checklist issued and briefed to affected teams.',
             'owner' => 'Engineering',
+            'responsible_department' => 'Engineering',
             'priority' => 'High',
+            'risk_relevance' => 'High',
+            'evidence_required' => true,
             'status' => 'Open',
+            'progress' => 20,
             'due_date' => now()->addDays(3)->toDateString(),
+            'assigned_at' => now()->subDay(),
+            'notified_at' => now()->subDay(),
         ]);
 
         QmsAction::updateOrCreate(['reference' => 'ACT-2026-00118'], [
             'source_reference' => 'QMS-2026-00435',
             'title' => 'Brief contractors on signage requirements',
+            'description' => 'Conduct toolbox briefing for signage and barricade requirements.',
+            'required_outcome' => 'Attendance evidence and briefing material attached.',
             'owner' => 'HSE',
+            'responsible_department' => 'HSE',
             'priority' => 'Medium',
+            'risk_relevance' => 'Medium',
+            'evidence_required' => true,
             'status' => 'In progress',
+            'progress' => 50,
             'due_date' => now()->addDays(5)->toDateString(),
+            'assigned_at' => now()->subDay(),
+            'notified_at' => now()->subDay(),
+            'accepted_at' => now()->subHours(18),
         ]);
 
         QmsInvestigation::updateOrCreate(['reference' => 'INV-2026-00012'], [
@@ -370,6 +395,106 @@ class QmsPrototypeSeeder extends Seeder
             'subject_template' => '[{{reference}}] CAPA action requires attention',
             'body_template' => 'Action {{reference}} is {{status}} and due on {{due_date}}. Update progress, evidence, or verification.',
             'change_note' => 'Default CAPA reminder and escalation message.',
+        ]);
+
+        $emailDesign = QmsEmailDesign::updateOrCreate(['code' => 'EMAIL-OCC-001'], [
+            'name' => 'QMS Record Action Email Layout',
+            'version' => 1,
+            'status' => 'Published',
+            'builder_schema' => [
+                'components' => ['Logo', 'Heading', 'Record information', 'Action button', 'Footer'],
+                'editor' => 'Approved visual builder adapter pending procurement.',
+                'layout' => 'Responsive single-column transactional email.',
+            ],
+            'html_snapshot' => null,
+            'variables' => ['user.name', 'record.reference', 'record.title', 'record.status', 'url.view_record'],
+            'change_note' => 'Default portable email layout foundation.',
+        ]);
+
+        $template = QmsNotificationTemplate::updateOrCreate(['code' => 'NTF-OCC-001'], [
+            'name' => 'Occurrence Requires Review',
+            'version' => 1,
+            'module' => 'Occurrences',
+            'status' => 'Published',
+            'email_design_id' => $emailDesign->id,
+            'subject_template' => '[{{record.reference}}] {{record.title}} requires review',
+            'body_template' => 'Hello {{user.name}}, record {{record.reference}} is at {{record.status}} and requires your review. Open {{url.view_record}}.',
+            'allowed_variables' => ['user.name', 'record.reference', 'record.title', 'record.status', 'url.view_record'],
+            'change_note' => 'Default separated notification content template.',
+        ]);
+
+        $group = QmsNotificationGroup::updateOrCreate(['code' => 'NG-SAFETY-KEY-USERS'], [
+            'name' => 'Safety Key Users',
+            'owner' => 'Safety Manager',
+            'status' => 'Active',
+            'description' => 'Scoped safety reviewers and escalation recipients.',
+        ]);
+
+        $group->members()->updateOrCreate([
+            'member_type' => 'role',
+            'member_reference' => 'Safety Admin',
+        ], [
+            'display_name' => 'Safety Admin role',
+        ]);
+
+        QmsNotificationRule::updateOrCreate(['code' => 'RULE-OCC-MAJOR-001'], [
+            'name' => 'Major occurrence review escalation',
+            'module' => 'Occurrences',
+            'event_trigger' => 'occurrence.accepted',
+            'status' => 'Published',
+            'notification_template_id' => $template->id,
+            'conditions' => ['all' => ['risk_rating:High or Critical', 'status:Accepted']],
+            'recipients' => ['targets' => ['Safety Key Users', 'Department Manager', 'Occurrence Owner']],
+            'channels' => ['In-App', 'Email'],
+            'timing' => ['schedule' => 'Immediately; +3 days if not reviewed; +7 days manager escalation'],
+            'change_note' => 'Default rule builder output for high-risk occurrence acceptance.',
+        ]);
+
+        QmsPermissionTemplate::updateOrCreate(['code' => 'PERM-SAFETY-KEY-USER'], [
+            'name' => 'Safety Key User',
+            'status' => 'Active',
+            'permissions' => ['occurrences.view.department', 'occurrences.review', 'recommendations.create', 'actions.assign', 'actions.escalate'],
+            'default_scopes' => ['DEPARTMENT', 'ASSIGNED'],
+            'description' => 'Can monitor and process incidents within assigned safety scope without global administration access.',
+        ]);
+
+        QmsAccessScope::updateOrCreate([
+            'principal_type' => 'role',
+            'principal_reference' => 'Safety Admin',
+            'module' => 'Occurrences',
+            'scope_type' => 'ALL',
+        ], [
+            'scope_value' => 'Safety',
+            'status' => 'Active',
+        ]);
+
+        $yahya = User::where('email', 'yahya.alnaaimi@qms.test')->first();
+        if ($yahya) {
+            QmsKeyUserAssignment::updateOrCreate([
+                'user_id' => $yahya->id,
+                'module' => 'Occurrences',
+                'scope_type' => 'DEPARTMENT',
+                'scope_value' => 'Safety',
+            ], [
+                'capabilities' => ['monitor', 'review', 'recommend', 'assign_actions', 'escalate'],
+                'effective_from' => now()->toDateString(),
+                'effective_until' => null,
+                'status' => 'Active',
+            ]);
+        }
+
+        QmsRecommendation::updateOrCreate(['reference' => 'REC-2026-00021'], [
+            'source_reference' => 'QMS-2026-00435',
+            'investigation_reference' => 'INV-2026-00012',
+            'finding' => 'Scaffolding area lacked consistent barricade and signage controls.',
+            'root_cause' => 'Contractor access control and pre-task verification were not consistently applied.',
+            'recommendation' => 'Introduce mandatory pre-task signage verification for temporary work zones.',
+            'rationale' => 'A formal verification step reduces recurrence and improves supervisor accountability.',
+            'priority' => 'High',
+            'safety_relevance' => 'Ground Safety',
+            'owner' => 'HSE',
+            'status' => 'Review',
+            'approval_decision' => 'Pending',
         ]);
 
         QmsSavedView::updateOrCreate(['name' => 'Executive high-risk watch', 'module' => 'Intelligence'], [

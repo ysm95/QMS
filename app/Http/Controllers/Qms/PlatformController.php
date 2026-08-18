@@ -3,8 +3,14 @@
 namespace App\Http\Controllers\Qms;
 
 use App\Http\Controllers\Controller;
+use App\Models\QmsAccessScope;
+use App\Models\QmsEmailDesign;
 use App\Models\QmsFormDefinition;
 use App\Models\QmsNotificationDesign;
+use App\Models\QmsNotificationGroup;
+use App\Models\QmsNotificationRule;
+use App\Models\QmsNotificationTemplate;
+use App\Models\QmsPermissionTemplate;
 use App\Models\QmsReportDesign;
 use App\Models\QmsSavedView;
 use App\Models\QmsWorkflowDefinition;
@@ -19,7 +25,13 @@ class PlatformController extends Controller
             'forms' => QmsFormDefinition::orderBy('module')->orderBy('name')->get(),
             'workflows' => QmsWorkflowDefinition::orderBy('module')->orderBy('name')->get(),
             'reportDesigns' => QmsReportDesign::orderBy('module')->orderBy('name')->get(),
+            'emailDesigns' => QmsEmailDesign::orderBy('name')->get(),
             'notificationDesigns' => QmsNotificationDesign::orderBy('module')->orderBy('name')->get(),
+            'notificationTemplates' => QmsNotificationTemplate::orderBy('module')->orderBy('name')->get(),
+            'notificationRules' => QmsNotificationRule::orderBy('module')->orderBy('name')->get(),
+            'notificationGroups' => QmsNotificationGroup::orderBy('name')->get(),
+            'permissionTemplates' => QmsPermissionTemplate::orderBy('name')->get(),
+            'accessScopes' => QmsAccessScope::orderBy('module')->orderBy('scope_type')->limit(20)->get(),
             'views' => QmsSavedView::latest()->get(),
         ]);
     }
@@ -118,6 +130,68 @@ class PlatformController extends Controller
         return redirect()->route('platform.index')->with('status', 'Report design created.');
     }
 
+    public function storeEmailDesign(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_email_designs,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'status' => ['required', 'string', 'max:40'],
+            'components' => ['nullable', 'string', 'max:1600'],
+            'variables' => ['nullable', 'string', 'max:1600'],
+            'html_snapshot' => ['nullable', 'string', 'max:8000'],
+            'change_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $emailDesign = QmsEmailDesign::create([
+            'code' => strtoupper($data['code']),
+            'name' => $data['name'],
+            'version' => 1,
+            'status' => $data['status'],
+            'builder_schema' => [
+                'components' => $this->listFromText($data['components'] ?? 'Logo, Heading, Text, Button, Record Info, Footer'),
+                'editor' => 'QMS-native placeholder; replace with approved visual editor adapter.',
+                'export' => 'Store portable HTML/MJML snapshot and QMS variable whitelist.',
+            ],
+            'html_snapshot' => $data['html_snapshot'] ?? null,
+            'variables' => $this->listFromText($data['variables'] ?? 'user.name, incident.reference, incident.title, action.reference, url.view_record'),
+            'change_note' => $data['change_note'] ?? 'Created from Email Designer',
+        ]);
+
+        QmsAuditTrail::record($request, $emailDesign, 'email_design_created', [], $emailDesign->getAttributes(), $emailDesign->change_note);
+
+        return redirect()->route('platform.index')->with('status', 'Email design created.');
+    }
+
+    public function storeNotificationTemplate(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_notification_templates,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'module' => ['required', 'string', 'max:80'],
+            'status' => ['required', 'string', 'max:40'],
+            'subject_template' => ['required', 'string', 'max:220'],
+            'body_template' => ['required', 'string', 'max:3000'],
+            'allowed_variables' => ['nullable', 'string', 'max:1600'],
+            'change_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $template = QmsNotificationTemplate::create([
+            'code' => strtoupper($data['code']),
+            'name' => $data['name'],
+            'version' => 1,
+            'module' => $data['module'],
+            'status' => $data['status'],
+            'subject_template' => $data['subject_template'],
+            'body_template' => $data['body_template'],
+            'allowed_variables' => $this->listFromText($data['allowed_variables'] ?? 'user.name, record.reference, record.title, record.status, url.view_record'),
+            'change_note' => $data['change_note'] ?? 'Created from Notification Template Builder',
+        ]);
+
+        QmsAuditTrail::record($request, $template, 'notification_template_created', [], $template->getAttributes(), $template->change_note);
+
+        return redirect()->route('platform.index')->with('status', 'Notification template created.');
+    }
+
     public function storeNotificationDesign(Request $request)
     {
         $data = $request->validate([
@@ -157,6 +231,62 @@ class PlatformController extends Controller
         QmsAuditTrail::record($request, $notificationDesign, 'notification_design_created', [], $notificationDesign->getAttributes(), $notificationDesign->change_note);
 
         return redirect()->route('platform.index')->with('status', 'Notification design created.');
+    }
+
+    public function storeNotificationRule(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_notification_rules,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'module' => ['required', 'string', 'max:80'],
+            'event_trigger' => ['required', 'string', 'max:120'],
+            'status' => ['required', 'string', 'max:40'],
+            'conditions' => ['nullable', 'string', 'max:1600'],
+            'recipients' => ['required', 'string', 'max:1600'],
+            'channels' => ['required', 'string', 'max:400'],
+            'timing' => ['nullable', 'string', 'max:800'],
+            'change_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $rule = QmsNotificationRule::create([
+            'code' => strtoupper($data['code']),
+            'name' => $data['name'],
+            'module' => $data['module'],
+            'event_trigger' => $data['event_trigger'],
+            'status' => $data['status'],
+            'conditions' => ['all' => $this->listFromText($data['conditions'] ?? '')],
+            'recipients' => ['targets' => $this->listFromText($data['recipients'])],
+            'channels' => $this->listFromText($data['channels']),
+            'timing' => ['schedule' => $data['timing'] ?? 'Immediately'],
+            'change_note' => $data['change_note'] ?? 'Created from Notification Rule Builder',
+        ]);
+
+        QmsAuditTrail::record($request, $rule, 'notification_rule_created', [], $rule->getAttributes(), $rule->change_note);
+
+        return redirect()->route('platform.index')->with('status', 'Notification rule created.');
+    }
+
+    public function storePermissionTemplate(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_permission_templates,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'status' => ['required', 'string', 'max:40'],
+            'permissions' => ['required', 'string', 'max:2400'],
+            'default_scopes' => ['nullable', 'string', 'max:1200'],
+            'description' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        QmsPermissionTemplate::create([
+            'code' => strtoupper($data['code']),
+            'name' => $data['name'],
+            'status' => $data['status'],
+            'permissions' => $this->listFromText($data['permissions']),
+            'default_scopes' => $this->listFromText($data['default_scopes'] ?? ''),
+            'description' => $data['description'] ?? null,
+        ]);
+
+        return redirect()->route('platform.index')->with('status', 'Permission template created.');
     }
 
     public function storeSavedView(Request $request)

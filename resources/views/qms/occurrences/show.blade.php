@@ -44,6 +44,14 @@
       <p>{{ $occurrence->immediate_corrective_action ?: 'No immediate corrective action entered.' }}</p>
       <h3>Linked actions</h3>
       <ul class="timeline">@foreach ($actions as $action)<li><strong>{{ $action->reference }}</strong><span>{{ $action->title }} - {{ $action->status }}</span></li>@endforeach</ul>
+      <h3>Recommendations</h3>
+      <ul class="timeline">
+        @forelse ($recommendations as $recommendation)
+          <li><strong>{{ $recommendation->reference }}</strong><span>{{ $recommendation->priority }} - {{ $recommendation->status }} - {{ $recommendation->recommendation }}</span></li>
+        @empty
+          <li><strong>No recommendations</strong><span>Create structured recommendations from findings instead of storing them in free text.</span></li>
+        @endforelse
+      </ul>
       <h3>Record notes</h3>
       <ul class="timeline">
         @forelse ($notes as $note)
@@ -76,6 +84,19 @@
         <label>Visibility<select name="visibility"><option>Internal</option><option>Reporter feedback</option><option>Confidential</option></select></label>
         <label>Note<textarea name="body" rows="4" required placeholder="Add screening decision, follow-up, or closure note."></textarea></label>
         <button class="secondary-button full">Add note</button>
+      </form>
+      <h2>Add recommendation</h2>
+      <form method="POST" action="{{ route('occurrences.recommendations.store', $occurrence) }}">
+        @csrf
+        <label>Finding<input name="finding" placeholder="Finding or gap"></label>
+        <label>Root cause<textarea name="root_cause" rows="2" placeholder="Root cause or contributing factor"></textarea></label>
+        <label>Recommendation<textarea name="recommendation" rows="3" required placeholder="Recommended control or improvement"></textarea></label>
+        <label>Rationale<textarea name="rationale" rows="2" placeholder="Why this recommendation matters"></textarea></label>
+        <label>Priority<select name="priority">@foreach (['Low', 'Medium', 'High', 'Critical'] as $priority)<option>{{ $priority }}</option>@endforeach</select></label>
+        <label>Safety relevance<input name="safety_relevance" value="Operational Safety"></label>
+        <label>Owner<input name="owner" placeholder="Department or person"></label>
+        <label>Status<select name="status">@foreach (['Draft', 'Review', 'Accepted', 'Returned', 'Rejected', 'Action Required'] as $status)<option>{{ $status }}</option>@endforeach</select></label>
+        <button class="secondary-button full">Create recommendation</button>
       </form>
     </aside>
   </div>

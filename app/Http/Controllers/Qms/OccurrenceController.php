@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Qms;
 use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
 use App\Models\QmsAuditLog;
+use App\Models\QmsInvestigation;
 use App\Models\QmsLocation;
 use App\Models\QmsOccurrence;
+use App\Models\QmsRecommendation;
 use App\Models\QmsRecordNote;
 use App\Models\User;
 use App\Support\QmsAuditTrail;
@@ -164,6 +166,7 @@ class OccurrenceController extends Controller
         return view('qms.occurrences.show', [
             'occurrence' => $occurrence,
             'actions' => QmsAction::where('source_reference', $occurrence->reference)->latest()->get(),
+            'recommendations' => QmsRecommendation::where('source_reference', $occurrence->reference)->latest()->get(),
             'notes' => QmsRecordNote::where('record_type', QmsOccurrence::class)->where('record_id', $occurrence->id)->latest()->get(),
             'auditLogs' => QmsAuditLog::where('auditable_type', QmsOccurrence::class)->where('auditable_id', $occurrence->id)->latest()->get(),
         ]);
@@ -183,6 +186,35 @@ class OccurrenceController extends Controller
         QmsAuditTrail::record($request, $occurrence, 'workflow_updated', $oldValues, $data, 'Workflow, status, or risk rating updated.');
 
         return back()->with('status', 'Workflow updated.');
+    }
+
+    public function storeRecommendation(Request $request, QmsOccurrence $occurrence)
+    {
+        $data = $request->validate([
+            'finding' => ['nullable', 'string', 'max:500'],
+            'root_cause' => ['nullable', 'string', 'max:2000'],
+            'recommendation' => ['required', 'string', 'max:3000'],
+            'rationale' => ['nullable', 'string', 'max:3000'],
+            'priority' => ['required', 'string', 'max:40'],
+            'safety_relevance' => ['required', 'string', 'max:120'],
+            'owner' => ['nullable', 'string', 'max:160'],
+            'status' => ['required', 'string', 'max:80'],
+        ]);
+
+        $recommendation = QmsRecommendation::create([
+            'reference' => 'REC-' . now()->format('Y') . '-' . str_pad((string) (QmsRecommendation::count() + 1), 5, '0', STR_PAD_LEFT),
+            'source_reference' => $occurrence->reference,
+            'investigation_reference' => QmsInvestigation::where('source_reference', $occurrence->reference)->value('reference'),
+            ...$data,
+            'approval_decision' => 'Pending',
+        ]);
+
+        QmsAuditTrail::record($request, $occurrence, 'recommendation_created', [], [
+            'recommendation_reference' => $recommendation->reference,
+            'status' => $recommendation->status,
+        ], 'Structured incident recommendation created.');
+
+        return back()->with('status', 'Recommendation created.');
     }
 
     public function storeNote(Request $request, QmsOccurrence $occurrence)

@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('occurrences', OccurrenceController::class)->only(['index', 'create', 'store', 'show']);
     Route::patch('occurrences/{occurrence}/advance', [OccurrenceController::class, 'advance'])->name('occurrences.advance');
     Route::post('occurrences/{occurrence}/notes', [OccurrenceController::class, 'storeNote'])->name('occurrences.notes.store');
+    Route::post('occurrences/{occurrence}/recommendations', [OccurrenceController::class, 'storeRecommendation'])->name('occurrences.recommendations.store');
 
     Route::get('actions', [ActionController::class, 'index'])->name('actions.index');
     Route::patch('actions/{action}', [ActionController::class, 'update'])->name('actions.update');
@@ -74,7 +75,11 @@ Route::middleware('auth')->group(function () {
     Route::post('platform/forms', [PlatformController::class, 'storeForm'])->name('platform.forms.store');
     Route::post('platform/workflows', [PlatformController::class, 'storeWorkflow'])->name('platform.workflows.store');
     Route::post('platform/report-designs', [PlatformController::class, 'storeReportDesign'])->name('platform.report-designs.store');
+    Route::post('platform/email-designs', [PlatformController::class, 'storeEmailDesign'])->name('platform.email-designs.store');
+    Route::post('platform/notification-templates', [PlatformController::class, 'storeNotificationTemplate'])->name('platform.notification-templates.store');
     Route::post('platform/notification-designs', [PlatformController::class, 'storeNotificationDesign'])->name('platform.notification-designs.store');
+    Route::post('platform/notification-rules', [PlatformController::class, 'storeNotificationRule'])->name('platform.notification-rules.store');
+    Route::post('platform/permission-templates', [PlatformController::class, 'storePermissionTemplate'])->name('platform.permission-templates.store');
     Route::post('platform/saved-views', [PlatformController::class, 'storeSavedView'])->name('platform.saved-views.store');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');

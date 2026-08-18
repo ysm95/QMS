@@ -12,7 +12,7 @@
     <a class="secondary-button" href="{{ route('actions.index') }}">Clear</a>
   </form>
 
-  <div class="table-panel"><table><thead><tr><th>ID</th><th>Source</th><th>Action</th><th>Owner</th><th>Priority</th><th>Due</th><th>Status</th><th>Update</th></tr></thead><tbody>
+  <div class="table-panel"><table><thead><tr><th>ID</th><th>Source</th><th>Action</th><th>Owner</th><th>Priority</th><th>Due</th><th>Status</th><th>Progress</th><th>Update</th></tr></thead><tbody>
     @foreach ($actions as $action)
       <tr>
         <td>{{ $action->reference }}</td>
@@ -22,7 +22,8 @@
         <td>{{ $action->priority }}</td>
         <td>{{ optional($action->due_date)->format('Y-m-d') }}</td>
         <td><span class="status-pill {{ optional($action->due_date)->isPast() && ! in_array($action->status, ['Closed', 'Verified']) ? 'warning' : '' }}">{{ $action->status }}</span></td>
-        <td><form class="inline-update" method="POST" action="{{ route('actions.update', $action) }}">@csrf @method('PATCH')<input name="evidence" value="{{ $action->evidence }}" placeholder="Evidence note"><select name="status">@foreach (['Open', 'In progress', 'Verification', 'Closed', 'Verified'] as $status)<option @selected($action->status === $status)>{{ $status }}</option>@endforeach</select><button class="secondary-button">Save</button></form></td>
+        <td>{{ $action->progress ?? 0 }}%</td>
+        <td><form class="inline-update" method="POST" action="{{ route('actions.update', $action) }}">@csrf @method('PATCH')<input name="evidence" value="{{ $action->evidence }}" placeholder="Evidence note"><input name="progress" type="number" min="0" max="100" value="{{ $action->progress ?? 0 }}"><select name="status">@foreach (['Open', 'Assigned', 'Accepted', 'In progress', 'Evidence Submitted', 'Verification', 'Returned', 'Effectiveness Review', 'Closed', 'Verified'] as $status)<option @selected($action->status === $status)>{{ $status }}</option>@endforeach</select><button class="secondary-button">Save</button></form></td>
       </tr>
     @endforeach
   </tbody></table></div>
