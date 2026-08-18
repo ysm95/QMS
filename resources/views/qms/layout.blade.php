@@ -6,6 +6,7 @@
   <title>{{ $title ?? 'QMS' }}</title>
   <link rel="stylesheet" href="{{ asset('qms-assets/style.css') }}">
   <link rel="stylesheet" href="{{ asset('qms-assets/phase2.css') }}">
+  <script defer src="{{ asset('qms-assets/studio.js') }}"></script>
 </head>
 <body>
   <div class="app-shell">

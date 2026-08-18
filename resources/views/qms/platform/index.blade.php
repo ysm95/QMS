@@ -4,36 +4,104 @@
 <section class="view active-view">
   <div class="page-title"><div><p class="eyebrow">Configurable platform</p><h1>Forms, workflows, and saved views</h1></div><span class="status-pill warning">Version controlled</span></div>
 
-  <div class="content-grid admin-console">
-    <form class="panel config-form" method="POST" action="{{ route('platform.forms.store') }}">
+  <div class="studio-grid">
+    <form class="studio-shell" method="POST" action="{{ route('platform.forms.store') }}" data-form-studio>
       @csrf
-      <h2>Create form definition</h2>
-      <div class="form-grid two">
-        <label>Code<input name="code" placeholder="FORM-HSE-001" required></label>
-        <label>Status<select name="status"><option>Draft</option><option>Published</option><option>Retired</option></select></label>
-        <label>Name<input name="name" placeholder="HSE Observation Report" required></label>
-        <label>Module<input name="module" placeholder="Occurrences" required></label>
+      <input type="hidden" name="canonical_schema" data-studio-schema>
+      <div class="studio-toolbar">
+        <div><p class="eyebrow">Form Studio</p><h2>Visual schema builder</h2></div>
+        <div class="button-row">
+          @foreach ($formStudio['previewModes'] as $mode)
+            <button class="secondary-button" type="button" data-preview-mode="{{ $mode }}">{{ $mode }}</button>
+          @endforeach
+          <button class="primary-button">Publish draft</button>
+        </div>
       </div>
-      <label>Sections<input name="sections" placeholder="Reporter, Event, Risk, Evidence, Actions"></label>
-      <label>Required fields<input name="required_fields" placeholder="Title, Reported By, Event Date, Location, Description"></label>
-      <label>Change note<textarea name="change_note" rows="2" placeholder="Reason for creating this form"></textarea></label>
-      <button class="primary-button">Create form</button>
+      <div class="studio-meta">
+        <label>Code<input name="code" value="FORM-STUDIO-{{ now()->format('His') }}" required></label>
+        <label>Name<input name="name" value="Studio Designed QMS Form" required></label>
+        <label>Module<input name="module" value="Reporting" required></label>
+        <label>Status<select name="status"><option>Draft</option><option>Published</option><option>Retired</option></select></label>
+      </div>
+      <div class="studio-columns">
+        <aside class="studio-palette">
+          @foreach ($formStudio['componentGroups'] as $group => $components)
+            <section>
+              <h3>{{ $group }}</h3>
+              @foreach ($components as $component)
+                <button type="button" draggable="true" data-component='@json($component)'>{{ $component['label'] }}</button>
+              @endforeach
+            </section>
+          @endforeach
+        </aside>
+        <main class="studio-canvas" data-form-canvas>
+          <div class="canvas-section">
+            <span>General</span>
+            <div class="canvas-field" data-key="event_title" data-type="text" data-category="Basic" data-required="true">Event title</div>
+            <div class="canvas-field" data-key="reported_by" data-type="user" data-category="Directory" data-data-source="DS-USERS-LOCAL" data-required="true">Reported by</div>
+            <div class="canvas-field" data-key="location" data-type="searchable_dropdown" data-category="Choice" data-data-source="DS-USERS-LOCAL" data-required="true">Location</div>
+          </div>
+          <div class="canvas-section">
+            <span>Risk and evidence</span>
+            <div class="canvas-field" data-key="severity" data-type="dropdown" data-category="Choice" data-required="true">Severity</div>
+            <div class="canvas-field" data-key="description" data-type="textarea" data-category="Basic" data-required="true">Description</div>
+          </div>
+        </main>
+        <aside class="studio-inspector">
+          <h3>Properties</h3>
+          <label>Selected label<input data-field-label value="Description"></label>
+          <label>Field key<input data-field-key value="description"></label>
+          <label>Required<select data-field-required><option value="true">Required</option><option value="false">Optional</option></select></label>
+          <label>Data source<select data-field-data-source><option value="">None</option>@foreach ($studioDataSources as $source)<option value="{{ $source->code }}">{{ $source->name }}</option>@endforeach</select></label>
+          <label>Sections<input name="sections" data-sections value="General, Risk and evidence"></label>
+          <label>Required fields<input name="required_fields" data-required-fields value="Event title, Reported by, Location, Severity, Description"></label>
+          <label>Change note<textarea name="change_note" rows="2">Studio draft with canonical schema, permissions, conditions and data-source metadata.</textarea></label>
+          <div class="schema-tree"><strong>Schema tree</strong><pre data-schema-preview></pre></div>
+        </aside>
+      </div>
     </form>
 
-    <form class="panel config-form" method="POST" action="{{ route('platform.workflows.store') }}">
+    <form class="studio-shell" method="POST" action="{{ route('platform.workflows.store') }}" data-workflow-studio>
       @csrf
-      <h2>Create workflow</h2>
-      <div class="form-grid two">
-        <label>Code<input name="code" placeholder="WF-NCR-001" required></label>
-        <label>Status<select name="status"><option>Draft</option><option>Published</option><option>Retired</option></select></label>
-        <label>Name<input name="name" placeholder="NCR Workflow" required></label>
-        <label>Module<input name="module" placeholder="Nonconformance" required></label>
+      <input type="hidden" name="canonical_workflow" data-workflow-schema>
+      <div class="studio-toolbar">
+        <div><p class="eyebrow">Workflow Studio</p><h2>Stage and rule canvas</h2></div>
+        <div class="button-row"><button class="secondary-button" type="button" data-simulate-workflow>Simulate</button><button class="primary-button">Publish workflow</button></div>
       </div>
-      <label>Stages<input name="stages" placeholder="Draft, Submitted, QA Review, Root Cause, CAPA, Verification, Closed" required></label>
-      <label>Routing rule<textarea name="routing_rule" rows="2" placeholder="Route by department, risk rating, owner role, and due date"></textarea></label>
-      <label>Change note<textarea name="change_note" rows="2" placeholder="Reason for workflow"></textarea></label>
-      <button class="primary-button">Create workflow</button>
+      <div class="studio-meta">
+        <label>Code<input name="code" value="WF-STUDIO-{{ now()->format('His') }}" required></label>
+        <label>Name<input name="name" value="Studio Designed Workflow" required></label>
+        <label>Module<input name="module" value="Reporting" required></label>
+        <label>Status<select name="status"><option>Draft</option><option>Published</option><option>Retired</option></select></label>
+      </div>
+      <div class="studio-columns workflow-columns">
+        <aside class="studio-palette">
+          @foreach ($workflowStudio['nodeGroups'] as $group => $nodes)
+            <section>
+              <h3>{{ $group }}</h3>
+              @foreach ($nodes as $node)
+                <button type="button" draggable="true" data-node='@json($node)'>{{ $node['label'] }}</button>
+              @endforeach
+            </section>
+          @endforeach
+        </aside>
+        <main class="studio-canvas workflow-canvas" data-workflow-canvas>
+          @foreach ($workflowStudio['defaultStages'] as $index => $stage)
+            <div class="workflow-node" data-type="{{ $index === 0 ? 'start' : ($loop->last ? 'end' : 'human_task') }}" data-kind="{{ $index === 0 ? 'Start event' : ($loop->last ? 'End event' : 'Task') }}" data-sla="P3D">{{ $stage }}</div>
+          @endforeach
+        </main>
+        <aside class="studio-inspector">
+          <h3>Rules</h3>
+          <label>Stages<input name="stages" data-workflow-stages value="{{ implode(', ', $workflowStudio['defaultStages']) }}" required></label>
+          <label>Routing rule<textarea name="routing_rule" rows="4">Route by risk, confidentiality, department, assigned key user, SLA and separation of duties.</textarea></label>
+          <label>Change note<textarea name="change_note" rows="2">Workflow Studio draft with canonical nodes, SLA, escalation and simulation readiness.</textarea></label>
+          <div class="schema-tree"><strong>Workflow JSON</strong><pre data-workflow-preview></pre></div>
+        </aside>
+      </div>
     </form>
+  </div>
+
+  <div class="content-grid admin-console">
 
     <form class="panel config-form" method="POST" action="{{ route('platform.report-designs.store') }}">
       @csrf

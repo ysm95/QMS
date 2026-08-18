@@ -24,13 +24,17 @@ use App\Models\QmsSystemMonitor;
 use App\Models\QmsSystemSetting;
 use App\Models\QmsWorkflowDefinition;
 use App\Support\QmsAuditTrail;
+use App\Support\QmsStudioCatalog;
 use Illuminate\Http\Request;
 
 class PlatformController extends Controller
 {
-    public function index()
+    public function index(QmsStudioCatalog $studioCatalog)
     {
         return view('qms.platform.index', [
+            'formStudio' => $studioCatalog->formStudio(),
+            'workflowStudio' => $studioCatalog->workflowStudio(),
+            'studioDataSources' => $studioCatalog->dataSourceOptions(),
             'forms' => QmsFormDefinition::orderBy('module')->orderBy('name')->get(),
             'workflows' => QmsWorkflowDefinition::orderBy('module')->orderBy('name')->get(),
             'reportDesigns' => QmsReportDesign::orderBy('module')->orderBy('name')->get(),
@@ -63,19 +67,18 @@ class PlatformController extends Controller
             'status' => ['required', 'string', 'max:40'],
             'sections' => ['nullable', 'string', 'max:1200'],
             'required_fields' => ['nullable', 'string', 'max:1200'],
+            'canonical_schema' => ['nullable', 'json', 'max:20000'],
             'change_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        $schema = $this->canonicalFormSchema($data);
         $form = QmsFormDefinition::create([
             'code' => strtoupper($data['code']),
             'name' => $data['name'],
             'version' => 1,
             'module' => $data['module'],
             'status' => $data['status'],
-            'schema' => [
-                'sections' => $this->listFromText($data['sections'] ?? ''),
-                'required' => $this->listFromText($data['required_fields'] ?? ''),
-            ],
+            'schema' => $schema,
             'change_note' => $data['change_note'] ?? 'Created from Platform Config',
         ]);
 
@@ -93,17 +96,19 @@ class PlatformController extends Controller
             'status' => ['required', 'string', 'max:40'],
             'stages' => ['required', 'string', 'max:1200'],
             'routing_rule' => ['nullable', 'string', 'max:2000'],
+            'canonical_workflow' => ['nullable', 'json', 'max:20000'],
             'change_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        $workflowSchema = $this->canonicalWorkflowSchema($data);
         $workflow = QmsWorkflowDefinition::create([
             'code' => strtoupper($data['code']),
             'name' => $data['name'],
             'version' => 1,
             'module' => $data['module'],
             'status' => $data['status'],
-            'stages' => $this->listFromText($data['stages']),
-            'rules' => ['routing' => $data['routing_rule'] ?? 'Owner moves record by authority and stage gate'],
+            'stages' => $workflowSchema['stages'],
+            'rules' => $workflowSchema['rules'],
             'change_note' => $data['change_note'] ?? 'Created from Platform Config',
         ]);
 
@@ -436,6 +441,129 @@ class PlatformController extends Controller
     {
         return collect(explode(',', $value))
             ->map(fn ($item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    private function canonicalFormSchema(array $data): array
+    {
+        $schema = json_decode($data['canonical_schema'] ?? '', true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($schema) && isset($schema['fields'])) {
+            return [
+                'version' => '1.0',
+                'source' => 'QMS Form Studio',
+                'sections' => $this->sanitizeList($schema['sections'] ?? []),
+                'required' => $this->sanitizeList($schema['required'] ?? []),
+                'fields' => $this->sanitizeFields($schema['fields']),
+                'layout' => $schema['layout'] ?? ['mode' => 'single_column'],
+                'permissions' => $schema['permissions'] ?? ['visibility' => 'role_and_scope'],
+                'conditions' => $schema['conditions'] ?? [],
+                'data_sources' => $this->sanitizeList($schema['data_sources'] ?? []),
+                'translations' => $schema['translations'] ?? ['en' => true, 'ar_ready' => true],
+                'history' => ['draft_created_at' => now()->toISOString()],
+            ];
+        }
+
+        $sections = $this->listFromText($data['sections'] ?? '');
+        $required = $this->listFromText($data['required_fields'] ?? '');
+
+        return [
+            'version' => '1.0',
+            'source' => 'Structured form definition',
+            'sections' => $sections,
+            'required' => $required,
+            'fields' => collect($required)->map(fn ($field) => [
+                'key' => str($field)->slug('_')->toString(),
+                'label' => $field,
+                'type' => 'text',
+                'section' => $sections[0] ?? 'General',
+                'required' => true,
+            ])->all(),
+            'layout' => ['mode' => 'single_column'],
+            'permissions' => ['visibility' => 'role_and_scope'],
+            'conditions' => [],
+            'data_sources' => [],
+            'translations' => ['en' => true, 'ar_ready' => true],
+        ];
+    }
+
+    private function canonicalWorkflowSchema(array $data): array
+    {
+        $schema = json_decode($data['canonical_workflow'] ?? '', true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($schema) && isset($schema['nodes'])) {
+            $stages = $this->sanitizeList($schema['stages'] ?? $data['stages']);
+
+            return [
+                'stages' => $stages,
+                'rules' => [
+                    'source' => 'QMS Workflow Studio',
+                    'routing' => $data['routing_rule'] ?? 'Owner moves record by authority and stage gate',
+                    'nodes' => $this->sanitizeNodes($schema['nodes']),
+                    'edges' => $schema['edges'] ?? [],
+                    'sla' => $schema['sla'] ?? ['business_days' => true],
+                    'version_protection' => true,
+                    'simulation_ready' => true,
+                    'separation_of_duties' => $schema['separation_of_duties'] ?? true,
+                ],
+            ];
+        }
+
+        return [
+            'stages' => $this->listFromText($data['stages']),
+            'rules' => [
+                'source' => 'Structured workflow definition',
+                'routing' => $data['routing_rule'] ?? 'Owner moves record by authority and stage gate',
+                'nodes' => [],
+                'edges' => [],
+                'version_protection' => true,
+            ],
+        ];
+    }
+
+    private function sanitizeFields(array $fields): array
+    {
+        return collect($fields)
+            ->map(fn ($field) => [
+                'key' => str((string) ($field['key'] ?? $field['label'] ?? 'field'))->slug('_')->toString(),
+                'label' => (string) ($field['label'] ?? 'Field'),
+                'type' => (string) ($field['type'] ?? 'text'),
+                'category' => (string) ($field['category'] ?? 'Basic'),
+                'section' => (string) ($field['section'] ?? 'General'),
+                'required' => (bool) ($field['required'] ?? false),
+                'data_source' => $field['data_source'] ?? null,
+                'visibility' => $field['visibility'] ?? 'role_and_scope',
+                'conditions' => $field['conditions'] ?? [],
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function sanitizeNodes(array $nodes): array
+    {
+        return collect($nodes)
+            ->map(fn ($node, $index) => [
+                'id' => (string) ($node['id'] ?? 'node_'.$index),
+                'type' => (string) ($node['type'] ?? 'human_task'),
+                'label' => (string) ($node['label'] ?? 'Workflow step'),
+                'kind' => (string) ($node['kind'] ?? 'Task'),
+                'assignee' => (string) ($node['assignee'] ?? 'record_owner'),
+                'sla' => (string) ($node['sla'] ?? 'P3D'),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function sanitizeList(array|string $items): array
+    {
+        if (is_string($items)) {
+            return $this->listFromText($items);
+        }
+
+        return collect($items)
+            ->map(fn ($item) => trim((string) $item))
             ->filter()
             ->values()
             ->all();
