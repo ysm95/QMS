@@ -16,6 +16,7 @@
       </div>
       <nav class="nav-list">
         <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
+        <a class="nav-item {{ request()->routeIs('my-work.*') ? 'active' : '' }}" href="{{ route('my-work.index') }}">My Work</a>
         <a class="nav-item {{ request()->routeIs('intelligence.*') ? 'active' : '' }}" href="{{ route('intelligence.index') }}">Intelligence</a>
         <a class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}" href="{{ route('reporting.index') }}">Reporting</a>
         <a class="nav-item {{ request()->routeIs('incidents.*') ? 'active' : '' }}" href="{{ route('incidents.index') }}">Incidents</a>

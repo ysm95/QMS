@@ -13,6 +13,7 @@ use App\Http\Controllers\Qms\IncidentController;
 use App\Http\Controllers\Qms\InvestigationController;
 use App\Http\Controllers\Qms\IntelligenceController;
 use App\Http\Controllers\Qms\NotificationController;
+use App\Http\Controllers\Qms\MyWorkController;
 use App\Http\Controllers\Qms\OccurrenceController;
 use App\Http\Controllers\Qms\ObjectiveController;
 use App\Http\Controllers\Qms\ManagementReviewController;
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('qms.dashboard');
     Route::get('/dashboard', DashboardController::class)->name('qms.dashboard.path');
     Route::get('/qms', DashboardController::class)->name('qms.index');
+    Route::get('my-work', [MyWorkController::class, 'index'])->name('my-work.index');
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
     Route::get('intelligence', [IntelligenceController::class, 'index'])->name('intelligence.index');
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
