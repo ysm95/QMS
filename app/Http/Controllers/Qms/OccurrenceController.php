@@ -12,6 +12,7 @@ use App\Models\QmsRecommendation;
 use App\Models\QmsRecordNote;
 use App\Models\User;
 use App\Support\QmsAuditTrail;
+use App\Support\QmsReportWorkflow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Qms\ReportingController;
@@ -108,57 +109,9 @@ class OccurrenceController extends Controller
             'feedback_to_reporter' => ['nullable', 'string', 'max:3000'],
         ]);
 
-        $occurrence = QmsOccurrence::create([
-            'reference' => 'QMS-' . now()->format('Y') . '-' . str_pad((string) (QmsOccurrence::count() + 1), 5, '0', STR_PAD_LEFT),
-            'report_key' => $data['report_key'] ?? null,
-            'title' => $data['event_title'] ?: Str::limit($data['description'], 80),
-            'event_title' => $data['event_title'] ?? null,
-            'type' => $data['type'],
-            'area_fleet' => $data['area_fleet'] ?? null,
-            'sector_to' => $data['sector_to'] ?? null,
-            'sector_diverted' => $data['sector_diverted'] ?? null,
-            'location' => $data['location'],
-            'exact_location' => $data['exact_location'] ?? null,
-            'reported_by' => $data['reported_by'],
-            'pilot_name' => $data['pilot_name'] ?? null,
-            'description' => $data['description'],
-            'flight_plan_details' => $data['flight_plan_details'] ?? null,
-            'action_taken' => $data['action_taken'] ?? [],
-            'immediate_corrective_action' => $data['immediate_corrective_action'] ?? null,
-            'feedback_to_reporter' => $data['feedback_to_reporter'] ?? null,
-            'status' => 'Submitted',
-            'workflow_stage' => 'HSE Review',
-            'risk_rating' => 'Medium',
-            'confidential' => (bool) ($data['confidential'] ?? false),
-            'mor' => (bool) ($data['mor'] ?? false),
-            'event_categories' => $data['event_categories'] ?? [],
-            'aircraft_type' => $data['aircraft_type'] ?? null,
-            'aircraft_registration' => $data['aircraft_registration'] ?? null,
-            'flight_number' => $data['flight_number'] ?? null,
-            'time_of_occurrence' => $data['time_of_occurrence'] ?? null,
-            'flight_cancelled' => (bool) ($data['flight_cancelled'] ?? false),
-            'personnel_involved' => $data['personnel_involved'] ?? [],
-            'event_date' => $data['event_date'] ?? null,
-            'reported_at' => now(),
-        ]);
+        $report = QmsReportWorkflow::submit($request, $data);
 
-        QmsAction::create([
-            'reference' => 'ACT-' . now()->format('Y') . '-' . str_pad((string) (QmsAction::count() + 1), 5, '0', STR_PAD_LEFT),
-            'source_reference' => $occurrence->reference,
-            'title' => 'Initial screening for ' . $occurrence->reference,
-            'owner' => 'HSE Review Team',
-            'priority' => 'High',
-            'status' => 'Open',
-            'due_date' => now()->addDays(2)->toDateString(),
-        ]);
-
-        QmsAuditTrail::record($request, $occurrence, 'submitted', [], [
-            'status' => $occurrence->status,
-            'workflow_stage' => $occurrence->workflow_stage,
-            'risk_rating' => $occurrence->risk_rating,
-        ], 'Occurrence submitted into QMS workflow.');
-
-        return redirect()->route('occurrences.show', $occurrence)->with('status', 'Occurrence submitted to HSE Review.');
+        return redirect()->route('reporting.show', $report)->with('status', 'Report submitted to Screening.');
     }
 
     public function show(QmsOccurrence $occurrence)

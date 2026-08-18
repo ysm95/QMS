@@ -15,6 +15,7 @@ use App\Models\QmsDomainPack;
 use App\Models\QmsEmailDesign;
 use App\Models\QmsElectronicSignature;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsIncident;
 use App\Models\QmsInvestigation;
 use App\Models\QmsIntegrationEvent;
 use App\Models\QmsKeyUserAssignment;
@@ -32,6 +33,7 @@ use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecordLink;
 use App\Models\QmsRecommendation;
+use App\Models\QmsReport;
 use App\Models\QmsRetentionRule;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
@@ -76,6 +78,55 @@ class QmsPrototypeSeeder extends Seeder
             'feedback_to_reporter' => 'HSE review initiated.',
             'event_date' => now()->toDateString(),
             'reported_at' => now(),
+        ]);
+
+        $seedReport = QmsReport::updateOrCreate(['reference' => 'REP-2026-000421'], [
+            'report_key' => 'ground-occurrence',
+            'title' => 'Unsafe condition near scaffolding',
+            'type' => 'Ground safety',
+            'category' => 'Ground safety',
+            'classification' => 'Voluntary',
+            'severity' => 'High',
+            'status' => 'Accepted',
+            'workflow_stage' => 'Accepted',
+            'location' => 'OQB Locations',
+            'department' => 'Engineering / Ground Operations',
+            'reported_by' => 'Mazin Al Farsi',
+            'reporter_user_id' => User::where('email', 'mazin.alfarsi@qms.test')->value('id'),
+            'anonymous' => false,
+            'confidential' => false,
+            'mandatory' => false,
+            'description' => 'A rusted pipe was observed and there was no signage displayed in an area where scaffolding erection was in progress.',
+            'payload' => ['source' => 'Seeded v3 reporting desk', 'legacy_occurrence_reference' => 'QMS-2026-00435'],
+            'reported_at' => now()->subDay(),
+            'submitted_at' => now()->subDay(),
+            'screened_at' => now(),
+            'screening_notes' => 'Accepted during baseline seeding to demonstrate report-to-incident separation.',
+        ]);
+
+        QmsIncident::updateOrCreate(['source_report_id' => $seedReport->id], [
+            'reference' => 'INC-2026-000183',
+            'source_report_reference' => $seedReport->reference,
+            'title' => $seedReport->title,
+            'type' => $seedReport->type,
+            'classification' => 'Safety Event',
+            'severity' => 'High',
+            'status' => 'Open',
+            'workflow_stage' => 'Classification',
+            'owner' => 'Safety Manager',
+            'department' => $seedReport->department,
+            'location' => $seedReport->location,
+            'investigation_required' => true,
+            'closure_blocked' => true,
+            'source_snapshot' => [
+                'report_reference' => $seedReport->reference,
+                'reported_by' => $seedReport->reported_by,
+                'description' => $seedReport->description,
+                'confidential' => $seedReport->confidential,
+                'payload' => $seedReport->payload,
+            ],
+            'accepted_at' => now(),
+            'accepted_by' => User::where('email', 'admin@qms.test')->value('id'),
         ]);
 
         QmsAction::updateOrCreate(['reference' => 'CAPA-2026-00077'], [
@@ -537,6 +588,7 @@ class QmsPrototypeSeeder extends Seeder
         }
 
         foreach ([
+            ['NUM-REP', 'Reporting', 'REP'],
             ['NUM-INC', 'Incidents', 'INC'],
             ['NUM-NCR', 'Non-Conformance', 'NCR'],
             ['NUM-AUD', 'Audits', 'AUD'],

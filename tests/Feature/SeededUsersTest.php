@@ -41,6 +41,6 @@ class SeededUsersTest extends TestCase
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee('Command dashboard')
-            ->assertSee('New occurrence');
+            ->assertSee('Submit report');
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\QmsOccurrence;
+use App\Models\QmsReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +37,7 @@ class Phase2CoreTest extends TestCase
         $this->get('/dashboard')->assertOk()->assertSee('Command dashboard');
     }
 
-    public function test_authenticated_user_can_create_occurrence(): void
+    public function test_authenticated_user_can_submit_report_for_screening(): void
     {
         $this->seed();
         $this->actingAs(User::where('email', 'yahya.alnaaimi@qms.test')->first());
@@ -67,15 +68,15 @@ class Phase2CoreTest extends TestCase
             'immediate_corrective_action' => 'Dispatcher revised the flight plan and briefed the crew.',
         ])->assertRedirect();
 
-        $this->assertDatabaseHas('qms_occurrences', [
+        $this->assertDatabaseHas('qms_reports', [
             'type' => 'Dispatch occurrence',
-            'workflow_stage' => 'HSE Review',
-            'event_title' => 'Dispatch fuel planning concern',
-            'sector_to' => 'DXB',
-            'sector_diverted' => 'MCT',
-            'pilot_name' => 'Mazin Al Farsi',
+            'workflow_stage' => 'Screening',
+            'title' => 'Dispatch fuel planning concern',
+            'status' => 'Submitted',
         ]);
-        $this->assertSame(2, QmsOccurrence::count());
+        $this->assertDatabaseMissing('qms_incidents', ['title' => 'Dispatch fuel planning concern']);
+        $this->assertSame(1, QmsOccurrence::count());
+        $this->assertSame(2, QmsReport::count());
     }
 
     public function test_commander_form_has_searchable_reference_fields(): void
@@ -99,7 +100,7 @@ class Phase2CoreTest extends TestCase
 
         $this->get('/reporting')
             ->assertOk()
-            ->assertSee('Reporting catalogue')
+            ->assertSee('Reporting desk')
             ->assertSee('Dispatch Occurrence Report')
             ->assertSee('Safety Confidential Report');
     }

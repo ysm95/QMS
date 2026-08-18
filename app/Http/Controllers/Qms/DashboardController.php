@@ -12,6 +12,7 @@ use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsDomainPack;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsIncident;
 use App\Models\QmsModuleLicense;
 use App\Models\QmsNumberingRule;
 use App\Models\QmsOfflineProfile;
@@ -23,6 +24,7 @@ use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPublicReport;
 use App\Models\QmsRecordLink;
+use App\Models\QmsReport;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
@@ -49,6 +51,8 @@ class DashboardController extends Controller
             QmsManagementReview::exists(),
             QmsTrainingRecord::exists(),
             QmsSupplier::exists(),
+            QmsReport::exists(),
+            QmsIncident::exists(),
             QmsFormDefinition::exists(),
             QmsWorkflowDefinition::exists(),
             QmsReportDesign::exists(),
@@ -69,6 +73,8 @@ class DashboardController extends Controller
         return view('qms.dashboard', [
             'metrics' => [
                 'openOccurrences' => QmsOccurrence::whereNotIn('status', ['Closed', 'Rejected'])->count(),
+                'openReports' => QmsReport::whereIn('status', ['Submitted', 'Returned for Information'])->count(),
+                'openIncidents' => QmsIncident::whereNotIn('status', ['Closed', 'Rejected'])->count(),
                 'overdueActions' => QmsAction::where('due_date', '<', now()->toDateString())->whereNotIn('status', ['Closed', 'Verified'])->count(),
                 'highRisks' => QmsRisk::whereIn('rating', ['High', 'Critical'])->count(),
                 'auditReadiness' => $auditReadiness,
@@ -95,6 +101,8 @@ class DashboardController extends Controller
             'training' => QmsTrainingRecord::latest()->limit(4)->get(),
             'suppliers' => QmsSupplier::latest()->limit(4)->get(),
             'publicReports' => QmsPublicReport::latest()->limit(4)->get(),
+            'reports' => QmsReport::latest()->limit(4)->get(),
+            'incidents' => QmsIncident::latest()->limit(4)->get(),
         ]);
     }
 }

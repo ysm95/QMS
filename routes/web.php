@@ -9,6 +9,7 @@ use App\Http\Controllers\Qms\ComplianceController;
 use App\Http\Controllers\Qms\DashboardController;
 use App\Http\Controllers\Qms\DocumentController;
 use App\Http\Controllers\Qms\ExportController;
+use App\Http\Controllers\Qms\IncidentController;
 use App\Http\Controllers\Qms\InvestigationController;
 use App\Http\Controllers\Qms\IntelligenceController;
 use App\Http\Controllers\Qms\NotificationController;
@@ -44,11 +45,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/{reportType}/create', [ReportingController::class, 'create'])->name('reporting.create');
+    Route::get('reports/{report}', [ReportingController::class, 'show'])->name('reporting.show');
+    Route::post('reports/{report}/accept', [ReportingController::class, 'accept'])->name('reporting.accept');
+    Route::post('reports/{report}/reject', [ReportingController::class, 'reject'])->name('reporting.reject');
 
     Route::resource('occurrences', OccurrenceController::class)->only(['index', 'create', 'store', 'show']);
     Route::patch('occurrences/{occurrence}/advance', [OccurrenceController::class, 'advance'])->name('occurrences.advance');
     Route::post('occurrences/{occurrence}/notes', [OccurrenceController::class, 'storeNote'])->name('occurrences.notes.store');
     Route::post('occurrences/{occurrence}/recommendations', [OccurrenceController::class, 'storeRecommendation'])->name('occurrences.recommendations.store');
+
+    Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    Route::get('incidents/{incident}', [IncidentController::class, 'show'])->name('incidents.show');
 
     Route::get('actions', [ActionController::class, 'index'])->name('actions.index');
     Route::patch('actions/{action}', [ActionController::class, 'update'])->name('actions.update');

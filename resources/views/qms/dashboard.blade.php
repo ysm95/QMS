@@ -9,12 +9,14 @@
     </div>
     <div class="button-row">
       <a class="secondary-button" href="{{ route('public-reports.index') }}">Public intake</a>
-      <a class="primary-button" href="{{ route('occurrences.create') }}">New occurrence</a>
+      <a class="primary-button" href="{{ route('reporting.index') }}">Submit report</a>
     </div>
   </div>
 
   <div class="metric-grid">
-    <article class="metric"><span>Open occurrences</span><strong>{{ $metrics['openOccurrences'] }}</strong><small>Live from database</small></article>
+    <article class="metric"><span>Open reports</span><strong>{{ $metrics['openReports'] }}</strong><small>Screening backlog</small></article>
+    <article class="metric"><span>Open incidents</span><strong>{{ $metrics['openIncidents'] }}</strong><small>Accepted reports only</small></article>
+    <article class="metric"><span>Open occurrences</span><strong>{{ $metrics['openOccurrences'] }}</strong><small>Legacy workspace</small></article>
     <article class="metric"><span>Overdue CAPA</span><strong>{{ $metrics['overdueActions'] }}</strong><small>Owner action queue</small></article>
     <article class="metric"><span>High risks</span><strong>{{ $metrics['highRisks'] }}</strong><small>Risk register</small></article>
     <article class="metric"><span>Audit readiness</span><strong>{{ $metrics['auditReadiness'] }}%</strong><small>BRSD evidence mapping</small></article>
@@ -28,7 +30,26 @@
 
   <div class="content-grid">
     <article class="panel wide">
-      <div class="panel-header"><h2>Occurrence workflow board</h2><span class="status-pill">Real records</span></div>
+      <div class="panel-header"><h2>Reporting and incident board</h2><span class="status-pill">Separated domains</span></div>
+      <div class="content-grid compact-grid">
+        <div>
+          <h3>Recent reports</h3>
+          <ul class="timeline">
+            @foreach ($reports as $report)
+              <li><strong><a href="{{ route('reporting.show', $report) }}">{{ $report->reference }}</a></strong><span>{{ $report->status }} - {{ $report->title }}</span></li>
+            @endforeach
+          </ul>
+        </div>
+        <div>
+          <h3>Recent incidents</h3>
+          <ul class="timeline">
+            @foreach ($incidents as $incident)
+              <li><strong><a href="{{ route('incidents.show', $incident) }}">{{ $incident->reference }}</a></strong><span>{{ $incident->workflow_stage }} - {{ $incident->title }}</span></li>
+            @endforeach
+          </ul>
+        </div>
+      </div>
+      <h3>Legacy occurrence workflow board</h3>
       <div class="kanban">
         @foreach ($workflowStages as $stage)
           <div class="lane">

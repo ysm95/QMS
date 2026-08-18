@@ -18,6 +18,7 @@
         <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
         <a class="nav-item {{ request()->routeIs('intelligence.*') ? 'active' : '' }}" href="{{ route('intelligence.index') }}">Intelligence</a>
         <a class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}" href="{{ route('reporting.index') }}">Reporting</a>
+        <a class="nav-item {{ request()->routeIs('incidents.*') ? 'active' : '' }}" href="{{ route('incidents.index') }}">Incidents</a>
         <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
         <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
         <a class="nav-item {{ request()->routeIs('investigations.*') ? 'active' : '' }}" href="{{ route('investigations.index') }}">Investigations</a>
