@@ -7,11 +7,14 @@ use App\Models\QmsAction;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsConfigurationPackage;
+use App\Models\QmsDataSource;
 use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
+use App\Models\QmsDomainPack;
 use App\Models\QmsFormDefinition;
 use App\Models\QmsModuleLicense;
 use App\Models\QmsNumberingRule;
+use App\Models\QmsOfflineProfile;
 use App\Models\QmsInvestigation;
 use App\Models\QmsLocation;
 use App\Models\QmsManagementReview;
@@ -23,6 +26,8 @@ use App\Models\QmsRecordLink;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
+use App\Models\QmsSyncAdapter;
+use App\Models\QmsSystemMonitor;
 use App\Models\QmsTrainingRecord;
 use App\Models\QmsWorkflowDefinition;
 use App\Models\QmsNotificationDesign;
@@ -51,6 +56,11 @@ class DashboardController extends Controller
             QmsModuleLicense::exists(),
             QmsNumberingRule::exists(),
             QmsConfigurationPackage::exists(),
+            QmsDataSource::exists(),
+            QmsDomainPack::exists(),
+            QmsSyncAdapter::exists(),
+            QmsOfflineProfile::exists(),
+            QmsSystemMonitor::exists(),
             QmsRecordLink::exists(),
             QmsAiProvider::exists(),
         ];

@@ -9,7 +9,9 @@ use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsConfigurationPackage;
+use App\Models\QmsDataSource;
 use App\Models\QmsDocument;
+use App\Models\QmsDomainPack;
 use App\Models\QmsEmailDesign;
 use App\Models\QmsElectronicSignature;
 use App\Models\QmsFormDefinition;
@@ -25,6 +27,7 @@ use App\Models\QmsNotificationRule;
 use App\Models\QmsNotificationTemplate;
 use App\Models\QmsNumberingRule;
 use App\Models\QmsObjective;
+use App\Models\QmsOfflineProfile;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecordLink;
@@ -34,6 +37,8 @@ use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSavedView;
 use App\Models\QmsSupplier;
+use App\Models\QmsSyncAdapter;
+use App\Models\QmsSystemMonitor;
 use App\Models\QmsSystemSetting;
 use App\Models\QmsTrainingRecord;
 use App\Models\QmsWorkflowDefinition;
@@ -600,6 +605,167 @@ class QmsPrototypeSeeder extends Seeder
             'attempts' => 0,
             'available_at' => now(),
         ]);
+
+        foreach ([
+            [
+                'DS-USERS-LOCAL',
+                'Local Users Lookup',
+                'Local Database',
+                null,
+                'users',
+                'id',
+                'name',
+                ['email'],
+                ['name', 'email'],
+                ['active:true'],
+                'current_user_scope',
+                'default',
+                'indexed_local',
+                'on_change',
+                50,
+                'show_governed_empty_state',
+                'Active',
+                'Used by Reported By, action owner, approver, auditor and investigator selectors.',
+            ],
+            [
+                'DS-ENTRA-USERS',
+                'Microsoft Entra Synchronized Users',
+                'Entra Sync',
+                'entra-directory-sync',
+                'directory_users',
+                'entra_object_id',
+                'display_name',
+                ['employee_id', 'department', 'station'],
+                ['display_name', 'employee_id', 'mail'],
+                ['account_enabled:true', 'policy_scope:qms_allowed'],
+                'directory_policy_scope',
+                'tenant_default',
+                'indexed_local',
+                'scheduled_incremental',
+                75,
+                'fallback_to_last_successful_sync',
+                'Draft',
+                'Preferred architecture: synchronize permitted directory attributes locally before form lookup.',
+            ],
+            [
+                'DS-FLEET-REGISTRY',
+                'Aircraft and Fleet Registry',
+                'Reference Data',
+                'fleet-reference',
+                'aircraft',
+                'aircraft_id',
+                'registration',
+                ['aircraft_type', 'fleet', 'status'],
+                ['registration', 'aircraft_type', 'fleet'],
+                ['active:true'],
+                'module_scope',
+                'default',
+                'indexed_local',
+                'scheduled',
+                100,
+                'show_no_active_aircraft',
+                'Active',
+                'Used by aviation reporting forms with cascading aircraft type dependency.',
+            ],
+            [
+                'DS-SUPPLIERS',
+                'Approved Suppliers and Service Providers',
+                'Local Database',
+                null,
+                'qms_suppliers',
+                'id',
+                'name',
+                ['reference', 'risk_rating', 'status'],
+                ['name', 'reference', 'category'],
+                ['status:not Disqualified'],
+                'supplier_scope',
+                'default',
+                'indexed_local',
+                'on_change',
+                50,
+                'show_governed_empty_state',
+                'Active',
+                'Used by supplier NCR, SCAR, audit and external evidence workflows.',
+            ],
+        ] as [$code, $name, $sourceType, $connector, $entity, $keyField, $displayField, $secondary, $searchFields, $filters, $permissionScope, $organizationScope, $cachePolicy, $refreshPolicy, $maxResults, $failurePolicy, $status, $notes]) {
+            QmsDataSource::updateOrCreate(['code' => $code], [
+                'name' => $name,
+                'source_type' => $sourceType,
+                'connector' => $connector,
+                'entity' => $entity,
+                'key_field' => $keyField,
+                'display_field' => $displayField,
+                'secondary_display_fields' => $secondary,
+                'search_fields' => $searchFields,
+                'filters' => ['rules' => $filters],
+                'permission_scope' => $permissionScope,
+                'organization_scope' => $organizationScope,
+                'cache_policy' => $cachePolicy,
+                'refresh_policy' => $refreshPolicy,
+                'max_results' => $maxResults,
+                'failure_policy' => $failurePolicy,
+                'status' => $status,
+                'governance_notes' => $notes,
+            ]);
+        }
+
+        foreach ([
+            ['PACK-CORE-QMS', 'Core Enterprise QMS', 'Core', 'QMS-CORE', true, 'Active', ['Document control', 'Audit', 'NCR', 'CAPA', 'Objectives', 'Management review']],
+            ['PACK-AVIATION', 'Aviation Safety and Quality Pack', 'Aviation', 'SMS', true, 'Active', ['Occurrence reporting', 'Hazard and risk', 'Investigation', 'SHELL', 'Safety assurance']],
+            ['PACK-SUPPLIER', 'Supplier Quality Pack', 'Supplier', 'SUPPLIER', true, 'UAT', ['Supplier qualification', 'Approved supplier list', 'SCAR', 'Scorecards', 'External evidence portal']],
+            ['PACK-MANUFACTURING', 'Manufacturing / Product Quality Pack', 'Manufacturing', 'MFG', false, 'Planned', ['Inspection plans', 'FMEA', 'SPC', '8D', 'Lot and serial traceability']],
+            ['PACK-SERVICE', 'Service Quality Pack', 'Service', 'SERVICE', false, 'Planned', ['Service failure', 'Complaints', 'SLA quality', 'Customer feedback']],
+            ['PACK-LAB', 'Laboratory / Calibration Pack', 'Laboratory', 'LAB', false, 'Planned', ['Calibration certificates', 'Out-of-tolerance events', 'Measurement traceability']],
+            ['PACK-FUTURE-REG', 'Future Regulated Extension Pack', 'Future Regulated', 'REG', false, 'Planned', ['Validation evidence', 'Specialized e-record controls', 'Explicit regulatory scope']],
+        ] as [$code, $name, $category, $licenseCode, $enabled, $status, $capabilities]) {
+            QmsDomainPack::updateOrCreate(['code' => $code], [
+                'name' => $name,
+                'category' => $category,
+                'license_code' => $licenseCode,
+                'enabled' => $enabled,
+                'status' => $status,
+                'capabilities' => $capabilities,
+                'shared_engines' => ['Workflow', 'Actions', 'Approvals', 'Notifications', 'Attachments', 'Audit Trail', 'Numbering', 'Reporting', 'Analytics', 'AI Gateway'],
+                'governance_notes' => 'Domain capability pack uses shared engines and remains independently licensable.',
+            ]);
+        }
+
+        QmsSyncAdapter::updateOrCreate(['code' => 'SYNC-ENTRA-USERS'], [
+            'name' => 'Microsoft Entra user synchronization',
+            'provider' => 'Microsoft Entra ID',
+            'purpose' => 'User, group, manager and department lookup foundation',
+            'status' => 'Not configured',
+            'field_mapping' => ['id' => 'entra_object_id', 'name' => 'displayName', 'email' => 'mail', 'department' => 'department'],
+            'sync_policy' => ['mode' => 'scheduled_incremental', 'fallback' => 'local_cache', 'delete_policy' => 'deactivate_only'],
+            'last_success_at' => null,
+            'last_error' => 'Credentials and tenant approval required before activation.',
+        ]);
+
+        QmsOfflineProfile::updateOrCreate(['code' => 'OFF-OCC-QUICK'], [
+            'name' => 'Quick occurrence reporting offline profile',
+            'module' => 'Occurrences',
+            'enabled' => false,
+            'allowed_operations' => ['Create draft', 'Attach evidence metadata', 'Queue submission'],
+            'sync_rules' => ['encrypt_local_cache' => true, 'validate_form_version' => true, 'recheck_permissions_on_sync' => true],
+            'conflict_policy' => 'server_authoritative_review',
+            'status' => 'Design',
+        ]);
+
+        foreach ([
+            ['MON-QUEUE', 'Queue and failed job monitor', 'Operations', 'Ready', ['failed_jobs', 'retry_queue', 'dead_letter_review'], 'Migration foundation ready; worker service to be configured on VPS.'],
+            ['MON-SCHEDULER', 'Scheduler health monitor', 'Operations', 'Ready', ['schedule_last_run', 'missed_tasks', 'report_delivery'], 'Scheduler command should run every minute on VPS.'],
+            ['MON-AI', 'Controlled AI governance monitor', 'AI', 'Blocked', ['provider_approval', 'usage_budget', 'audit_log'], 'AI remains blocked until paid secured provider is approved.'],
+            ['MON-EXPORTS', 'Sensitive export monitor', 'Security', 'Ready', ['export_audit', 'large_export_queue', 'permission_check'], 'Queued export architecture prepared for production hardening.'],
+        ] as [$code, $name, $area, $status, $checks, $result]) {
+            QmsSystemMonitor::updateOrCreate(['code' => $code], [
+                'name' => $name,
+                'area' => $area,
+                'status' => $status,
+                'checks' => $checks,
+                'last_result' => $result,
+                'checked_at' => now(),
+            ]);
+        }
 
         QmsSavedView::updateOrCreate(['name' => 'Executive high-risk watch', 'module' => 'Intelligence'], [
             'owner' => 'QMS Administrator',

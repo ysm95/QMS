@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Qms;
 use App\Http\Controllers\Controller;
 use App\Models\QmsAccessScope;
 use App\Models\QmsConfigurationPackage;
+use App\Models\QmsDataSource;
+use App\Models\QmsDomainPack;
 use App\Models\QmsEmailDesign;
 use App\Models\QmsFormDefinition;
 use App\Models\QmsModuleLicense;
@@ -13,9 +15,12 @@ use App\Models\QmsNotificationGroup;
 use App\Models\QmsNotificationRule;
 use App\Models\QmsNotificationTemplate;
 use App\Models\QmsNumberingRule;
+use App\Models\QmsOfflineProfile;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsReportDesign;
 use App\Models\QmsSavedView;
+use App\Models\QmsSyncAdapter;
+use App\Models\QmsSystemMonitor;
 use App\Models\QmsSystemSetting;
 use App\Models\QmsWorkflowDefinition;
 use App\Support\QmsAuditTrail;
@@ -40,6 +45,11 @@ class PlatformController extends Controller
             'numberingRules' => QmsNumberingRule::orderBy('module')->get(),
             'configurationPackages' => QmsConfigurationPackage::latest()->get(),
             'moduleLicenses' => QmsModuleLicense::orderBy('name')->get(),
+            'dataSources' => QmsDataSource::orderBy('source_type')->orderBy('name')->get(),
+            'domainPacks' => QmsDomainPack::orderBy('category')->orderBy('name')->get(),
+            'syncAdapters' => QmsSyncAdapter::orderBy('provider')->orderBy('name')->get(),
+            'systemMonitors' => QmsSystemMonitor::orderBy('area')->orderBy('name')->get(),
+            'offlineProfiles' => QmsOfflineProfile::orderBy('module')->orderBy('name')->get(),
             'views' => QmsSavedView::latest()->get(),
         ]);
     }
@@ -340,6 +350,65 @@ class PlatformController extends Controller
         ]);
 
         return redirect()->route('platform.index')->with('status', 'Configuration package created.');
+    }
+
+    public function storeDataSource(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_data_sources,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'source_type' => ['required', 'string', 'max:80'],
+            'connector' => ['nullable', 'string', 'max:120'],
+            'entity' => ['required', 'string', 'max:120'],
+            'key_field' => ['required', 'string', 'max:80'],
+            'display_field' => ['required', 'string', 'max:80'],
+            'secondary_display_fields' => ['nullable', 'string', 'max:800'],
+            'search_fields' => ['required', 'string', 'max:800'],
+            'filters' => ['nullable', 'string', 'max:1200'],
+            'permission_scope' => ['required', 'string', 'max:120'],
+            'organization_scope' => ['required', 'string', 'max:120'],
+            'cache_policy' => ['required', 'string', 'max:120'],
+            'refresh_policy' => ['required', 'string', 'max:120'],
+            'max_results' => ['required', 'integer', 'min:1', 'max:500'],
+            'failure_policy' => ['required', 'string', 'max:160'],
+            'status' => ['required', 'string', 'max:40'],
+            'governance_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        QmsDataSource::create([
+            ...$data,
+            'code' => strtoupper($data['code']),
+            'secondary_display_fields' => $this->listFromText($data['secondary_display_fields'] ?? ''),
+            'search_fields' => $this->listFromText($data['search_fields']),
+            'filters' => ['rules' => $this->listFromText($data['filters'] ?? '')],
+        ]);
+
+        return redirect()->route('platform.index')->with('status', 'Data source registered.');
+    }
+
+    public function storeDomainPack(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_domain_packs,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'category' => ['required', 'string', 'max:80'],
+            'license_code' => ['nullable', 'string', 'max:80'],
+            'enabled' => ['nullable', 'boolean'],
+            'status' => ['required', 'string', 'max:40'],
+            'capabilities' => ['required', 'string', 'max:2000'],
+            'shared_engines' => ['nullable', 'string', 'max:1600'],
+            'governance_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        QmsDomainPack::create([
+            ...$data,
+            'code' => strtoupper($data['code']),
+            'enabled' => (bool) ($data['enabled'] ?? false),
+            'capabilities' => $this->listFromText($data['capabilities']),
+            'shared_engines' => $this->listFromText($data['shared_engines'] ?? 'Workflow, Actions, Audit Trail, Attachments, Reporting, AI Gateway'),
+        ]);
+
+        return redirect()->route('platform.index')->with('status', 'Domain pack created.');
     }
 
     public function storeSavedView(Request $request)

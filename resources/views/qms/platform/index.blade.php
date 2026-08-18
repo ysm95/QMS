@@ -162,6 +162,49 @@
       <button class="primary-button">Create package</button>
     </form>
 
+    <form class="panel config-form" method="POST" action="{{ route('platform.data-sources.store') }}">
+      @csrf
+      <h2>Data source registry</h2>
+      <div class="form-grid two">
+        <label>Code<input name="code" placeholder="DS-ENTRA-USERS" required></label>
+        <label>Status<select name="status"><option>Active</option><option>Draft</option><option>Paused</option><option>Retired</option></select></label>
+        <label>Name<input name="name" placeholder="Microsoft Entra Users" required></label>
+        <label>Source type<select name="source_type"><option>Local Database</option><option>Entra Sync</option><option>REST Adapter</option><option>Reference Data</option></select></label>
+        <label>Connector<input name="connector" placeholder="entra-directory-sync"></label>
+        <label>Entity<input name="entity" placeholder="users" required></label>
+        <label>Key field<input name="key_field" value="id" required></label>
+        <label>Display field<input name="display_field" placeholder="name" required></label>
+        <label>Search fields<input name="search_fields" placeholder="name, employee_id, email" required></label>
+        <label>Context fields<input name="secondary_display_fields" placeholder="employee_id, department, station"></label>
+        <label>Permission scope<input name="permission_scope" value="current_user_scope" required></label>
+        <label>Organization scope<input name="organization_scope" value="default" required></label>
+        <label>Cache policy<input name="cache_policy" value="indexed_local" required></label>
+        <label>Refresh policy<input name="refresh_policy" value="scheduled" required></label>
+        <label>Maximum results<input name="max_results" type="number" min="1" max="500" value="50" required></label>
+        <label>Failure policy<input name="failure_policy" value="show_governed_empty_state" required></label>
+      </div>
+      <label>Filters<input name="filters" placeholder="active:true, scope:department, expose_sensitive:false"></label>
+      <label>Governance notes<textarea name="governance_notes" rows="2" placeholder="No raw SQL. Permission filtering applies before choices are shown."></textarea></label>
+      <button class="primary-button">Register source</button>
+    </form>
+
+    <form class="panel config-form" method="POST" action="{{ route('platform.domain-packs.store') }}">
+      @csrf
+      <h2>Domain pack</h2>
+      <div class="form-grid two">
+        <label>Code<input name="code" placeholder="PACK-LAB" required></label>
+        <label>Status<select name="status"><option>Planned</option><option>Active</option><option>UAT</option><option>Retired</option></select></label>
+        <label>Name<input name="name" placeholder="Laboratory / Calibration Pack" required></label>
+        <label>Category<select name="category"><option>Core</option><option>Aviation</option><option>Supplier</option><option>Manufacturing</option><option>Service</option><option>Laboratory</option><option>Future Regulated</option></select></label>
+        <label>License code<input name="license_code" placeholder="LAB"></label>
+        <label class="inline-check"><input name="enabled" type="checkbox" value="1"> Enabled</label>
+      </div>
+      <label>Capabilities<input name="capabilities" placeholder="Calibration certificates, out-of-tolerance event, impact assessment" required></label>
+      <label>Shared engines<input name="shared_engines" placeholder="Workflow, Actions, Audit Trail, Attachments, Reporting, AI Gateway"></label>
+      <label>Governance notes<textarea name="governance_notes" rows="2" placeholder="Reuse shared engines. Do not claim regulatory compliance until configured and validated."></textarea></label>
+      <button class="primary-button">Create domain pack</button>
+    </form>
+
     <form class="panel config-form" method="POST" action="{{ route('platform.saved-views.store') }}">
       @csrf
       <h2>Create saved view</h2>
@@ -281,6 +324,45 @@
       <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Version</th><th>Status</th><th>Effective</th><th>Validation</th></tr></thead><tbody>
         @foreach ($configurationPackages as $package)
           <tr><td>{{ $package->code }}</td><td>{{ $package->name }}</td><td>v{{ $package->version }}</td><td><span class="status-pill">{{ $package->status }}</span></td><td>{{ optional($package->effective_date)->format('Y-m-d') ?? 'Not set' }}</td><td>{{ $package->validation_summary ?: 'Pending validation' }}</td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Data source registry</h2><span class="status-pill">Approved lookups</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Entity</th><th>Search</th><th>Scope</th><th>Status</th></tr></thead><tbody>
+        @foreach ($dataSources as $source)
+          <tr><td>{{ $source->code }}</td><td>{{ $source->name }}</td><td>{{ $source->source_type }}</td><td>{{ $source->entity }}</td><td>{{ implode(', ', $source->search_fields ?? []) }}</td><td>{{ $source->permission_scope }}</td><td><span class="status-pill">{{ $source->status }}</span></td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Domain pack matrix</h2><span class="status-pill">Licensed expansion</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Category</th><th>License</th><th>Enabled</th><th>Capabilities</th><th>Status</th></tr></thead><tbody>
+        @foreach ($domainPacks as $pack)
+          <tr><td>{{ $pack->code }}</td><td>{{ $pack->name }}</td><td>{{ $pack->category }}</td><td>{{ $pack->license_code ?? 'Core' }}</td><td>{{ $pack->enabled ? 'Yes' : 'No' }}</td><td>{{ implode(', ', $pack->capabilities ?? []) }}</td><td><span class="status-pill">{{ $pack->status }}</span></td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Sync adapters and offline profiles</h2><span class="status-pill">Mobile and Entra ready</span></div>
+      <div class="table-panel"><table><thead><tr><th>Name</th><th>Provider / Module</th><th>Purpose</th><th>Status</th><th>Policy</th></tr></thead><tbody>
+        @foreach ($syncAdapters as $adapter)
+          <tr><td>{{ $adapter->name }}</td><td>{{ $adapter->provider }}</td><td>{{ $adapter->purpose }}</td><td><span class="status-pill">{{ $adapter->status }}</span></td><td>{{ json_encode($adapter->sync_policy) }}</td></tr>
+        @endforeach
+        @foreach ($offlineProfiles as $profile)
+          <tr><td>{{ $profile->name }}</td><td>{{ $profile->module }}</td><td>Offline profile</td><td><span class="status-pill">{{ $profile->status }}</span></td><td>{{ $profile->conflict_policy }}</td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Production monitors</h2><span class="status-pill">Operations</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Area</th><th>Status</th><th>Checks</th><th>Last result</th></tr></thead><tbody>
+        @foreach ($systemMonitors as $monitor)
+          <tr><td>{{ $monitor->code }}</td><td>{{ $monitor->name }}</td><td>{{ $monitor->area }}</td><td><span class="status-pill">{{ $monitor->status }}</span></td><td>{{ implode(', ', $monitor->checks ?? []) }}</td><td>{{ $monitor->last_result }}</td></tr>
         @endforeach
       </tbody></table></div>
     </article>

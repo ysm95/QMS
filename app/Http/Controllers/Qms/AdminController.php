@@ -21,9 +21,14 @@ use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecommendation;
 use App\Models\QmsConfigurationPackage;
+use App\Models\QmsDataSource;
+use App\Models\QmsDomainPack;
+use App\Models\QmsOfflineProfile;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
+use App\Models\QmsSyncAdapter;
+use App\Models\QmsSystemMonitor;
 use App\Models\QmsTrainingRecord;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -69,6 +74,11 @@ class AdminController extends Controller
                 'Licenses' => QmsModuleLicense::count(),
                 'Numbering rules' => QmsNumberingRule::count(),
                 'Config packages' => QmsConfigurationPackage::count(),
+                'Data sources' => QmsDataSource::count(),
+                'Domain packs' => QmsDomainPack::count(),
+                'Sync adapters' => QmsSyncAdapter::count(),
+                'Offline profiles' => QmsOfflineProfile::count(),
+                'System monitors' => QmsSystemMonitor::count(),
             ],
         ]);
     }

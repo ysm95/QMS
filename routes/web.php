@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::post('platform/permission-templates', [PlatformController::class, 'storePermissionTemplate'])->name('platform.permission-templates.store');
     Route::post('platform/numbering-rules', [PlatformController::class, 'storeNumberingRule'])->name('platform.numbering-rules.store');
     Route::post('platform/configuration-packages', [PlatformController::class, 'storeConfigurationPackage'])->name('platform.configuration-packages.store');
+    Route::post('platform/data-sources', [PlatformController::class, 'storeDataSource'])->name('platform.data-sources.store');
+    Route::post('platform/domain-packs', [PlatformController::class, 'storeDomainPack'])->name('platform.domain-packs.store');
     Route::post('platform/saved-views', [PlatformController::class, 'storeSavedView'])->name('platform.saved-views.store');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');
