@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Qms;
 
 use App\Http\Controllers\Controller;
 use App\Models\QmsAccessScope;
+use App\Models\QmsConfigurationPackage;
 use App\Models\QmsEmailDesign;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsModuleLicense;
 use App\Models\QmsNotificationDesign;
 use App\Models\QmsNotificationGroup;
 use App\Models\QmsNotificationRule;
 use App\Models\QmsNotificationTemplate;
+use App\Models\QmsNumberingRule;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsReportDesign;
 use App\Models\QmsSavedView;
+use App\Models\QmsSystemSetting;
 use App\Models\QmsWorkflowDefinition;
 use App\Support\QmsAuditTrail;
 use Illuminate\Http\Request;
@@ -32,6 +36,10 @@ class PlatformController extends Controller
             'notificationGroups' => QmsNotificationGroup::orderBy('name')->get(),
             'permissionTemplates' => QmsPermissionTemplate::orderBy('name')->get(),
             'accessScopes' => QmsAccessScope::orderBy('module')->orderBy('scope_type')->limit(20)->get(),
+            'systemSettings' => QmsSystemSetting::orderBy('group')->orderBy('key')->get(),
+            'numberingRules' => QmsNumberingRule::orderBy('module')->get(),
+            'configurationPackages' => QmsConfigurationPackage::latest()->get(),
+            'moduleLicenses' => QmsModuleLicense::orderBy('name')->get(),
             'views' => QmsSavedView::latest()->get(),
         ]);
     }
@@ -287,6 +295,51 @@ class PlatformController extends Controller
         ]);
 
         return redirect()->route('platform.index')->with('status', 'Permission template created.');
+    }
+
+    public function storeNumberingRule(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_numbering_rules,code'],
+            'module' => ['required', 'string', 'max:80'],
+            'prefix' => ['required', 'string', 'max:20'],
+            'pattern' => ['required', 'string', 'max:160'],
+            'next_sequence' => ['required', 'integer', 'min:1'],
+            'reset_annually' => ['nullable', 'boolean'],
+            'status' => ['required', 'string', 'max:40'],
+        ]);
+
+        QmsNumberingRule::create([
+            ...$data,
+            'code' => strtoupper($data['code']),
+            'reset_annually' => (bool) ($data['reset_annually'] ?? false),
+        ]);
+
+        return redirect()->route('platform.index')->with('status', 'Numbering rule created.');
+    }
+
+    public function storeConfigurationPackage(Request $request)
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string', 'max:80', 'unique:qms_configuration_packages,code'],
+            'name' => ['required', 'string', 'max:160'],
+            'status' => ['required', 'string', 'max:40'],
+            'effective_date' => ['nullable', 'date'],
+            'payload_summary' => ['nullable', 'string', 'max:2000'],
+            'validation_summary' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        QmsConfigurationPackage::create([
+            'code' => strtoupper($data['code']),
+            'name' => $data['name'],
+            'version' => 1,
+            'status' => $data['status'],
+            'effective_date' => $data['effective_date'] ?? null,
+            'payload' => ['summary' => $data['payload_summary'] ?? 'Forms, workflows, notifications, numbering, roles'],
+            'validation_summary' => $data['validation_summary'] ?? null,
+        ]);
+
+        return redirect()->route('platform.index')->with('status', 'Configuration package created.');
     }
 
     public function storeSavedView(Request $request)

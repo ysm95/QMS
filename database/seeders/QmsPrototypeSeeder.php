@@ -4,29 +4,37 @@ namespace Database\Seeders;
 
 use App\Models\QmsAction;
 use App\Models\QmsAccessScope;
+use App\Models\QmsAttachment;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
 use App\Models\QmsComplianceFramework;
+use App\Models\QmsConfigurationPackage;
 use App\Models\QmsDocument;
 use App\Models\QmsEmailDesign;
+use App\Models\QmsElectronicSignature;
 use App\Models\QmsFormDefinition;
 use App\Models\QmsInvestigation;
+use App\Models\QmsIntegrationEvent;
 use App\Models\QmsKeyUserAssignment;
 use App\Models\QmsManagementReview;
+use App\Models\QmsModuleLicense;
 use App\Models\QmsNotification;
 use App\Models\QmsNotificationDesign;
 use App\Models\QmsNotificationGroup;
 use App\Models\QmsNotificationRule;
 use App\Models\QmsNotificationTemplate;
+use App\Models\QmsNumberingRule;
 use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecordLink;
 use App\Models\QmsRecommendation;
+use App\Models\QmsRetentionRule;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSavedView;
 use App\Models\QmsSupplier;
+use App\Models\QmsSystemSetting;
 use App\Models\QmsTrainingRecord;
 use App\Models\QmsWorkflowDefinition;
 use App\Models\User;
@@ -495,6 +503,102 @@ class QmsPrototypeSeeder extends Seeder
             'owner' => 'HSE',
             'status' => 'Review',
             'approval_decision' => 'Pending',
+        ]);
+
+        QmsSystemSetting::updateOrCreate(['key' => 'brand.primary'], [
+            'group' => 'Branding',
+            'value' => ['organization' => 'QMS.ysaidea.com', 'system' => 'Enterprise Quality Management System', 'primary_color' => '#0867a8'],
+            'is_sensitive' => false,
+            'status' => 'Active',
+            'change_note' => 'Default branding control center setting.',
+        ]);
+
+        foreach ([
+            ['QMS-CORE', 'QMS Core'],
+            ['SMS', 'Safety Management System'],
+            ['HSE', 'Health, Safety and Environment'],
+            ['RISK', 'Enterprise Risk Management'],
+            ['AUDIT', 'Audit Management'],
+            ['AI', 'Controlled AI'],
+        ] as [$code, $name]) {
+            QmsModuleLicense::updateOrCreate(['code' => $code], [
+                'name' => $name,
+                'enabled' => $code !== 'AI',
+                'status' => $code === 'AI' ? 'Pending Approval' : 'Active',
+                'expires_on' => now()->addYear()->toDateString(),
+                'limits' => ['users' => 250, 'storage_gb' => 100],
+                'notes' => $code === 'AI' ? 'AI is disabled until provider governance is approved.' : 'Initial production module license.',
+            ]);
+        }
+
+        foreach ([
+            ['NUM-INC', 'Incidents', 'INC'],
+            ['NUM-NCR', 'Non-Conformance', 'NCR'],
+            ['NUM-AUD', 'Audits', 'AUD'],
+            ['NUM-ACT', 'Actions', 'ACT'],
+        ] as [$code, $module, $prefix]) {
+            QmsNumberingRule::updateOrCreate(['code' => $code], [
+                'module' => $module,
+                'prefix' => $prefix,
+                'pattern' => '{PREFIX}-{YYYY}-{SEQ:6}',
+                'next_sequence' => 1,
+                'reset_annually' => true,
+                'status' => 'Active',
+            ]);
+        }
+
+        QmsConfigurationPackage::updateOrCreate(['code' => 'CFG-BASELINE-001'], [
+            'name' => 'Production baseline configuration',
+            'version' => 1,
+            'status' => 'Validated',
+            'payload' => ['includes' => ['forms', 'workflows', 'notifications', 'numbering', 'permission templates']],
+            'effective_date' => now()->toDateString(),
+            'validation_summary' => 'Initial baseline dependency checks completed for prototype production foundation.',
+        ]);
+
+        QmsRetentionRule::updateOrCreate(['code' => 'RET-SAFETY-STD'], [
+            'module' => 'Occurrences',
+            'classification' => 'Safety Record',
+            'retention_years' => 10,
+            'legal_hold_allowed' => true,
+            'disposition' => 'Archive',
+            'status' => 'Active',
+        ]);
+
+        QmsAttachment::updateOrCreate(['record_reference' => 'QMS-2026-00435', 'original_name' => 'evidence-placeholder.txt'], [
+            'record_type' => QmsOccurrence::class,
+            'record_id' => QmsOccurrence::where('reference', 'QMS-2026-00435')->value('id'),
+            'uploaded_by' => $admin?->id,
+            'stored_path' => 'secure-evidence/evidence-placeholder.txt',
+            'mime_type' => 'text/plain',
+            'size_bytes' => 0,
+            'content_hash' => hash('sha256', 'placeholder'),
+            'classification' => 'Internal',
+            'scan_status' => 'Pending',
+            'quarantined' => false,
+            'metadata' => ['note' => 'Metadata-only secure attachment foundation.'],
+        ]);
+
+        QmsElectronicSignature::updateOrCreate(['record_reference' => 'DOC-HSE-001', 'meaning' => 'Document review acknowledgement'], [
+            'record_type' => QmsDocument::class,
+            'record_id' => QmsDocument::where('reference', 'DOC-HSE-001')->value('id'),
+            'user_id' => $admin?->id,
+            'signer_name' => $admin?->name ?? 'QMS Administrator',
+            'record_version' => '1.4',
+            'snapshot_hash' => hash('sha256', 'DOC-HSE-001-v1.4'),
+            'auth_context' => ['method' => 'session', 'reauth_required' => false],
+            'reason' => 'Seeded signature architecture example.',
+            'signed_at' => now(),
+        ]);
+
+        QmsIntegrationEvent::updateOrCreate(['idempotency_key' => 'baseline-qms-config-published'], [
+            'correlation_id' => (string) \Illuminate\Support\Str::uuid(),
+            'event_type' => 'configuration.published',
+            'source_module' => 'Administration',
+            'status' => 'Pending',
+            'payload' => ['package' => 'CFG-BASELINE-001'],
+            'attempts' => 0,
+            'available_at' => now(),
         ]);
 
         QmsSavedView::updateOrCreate(['name' => 'Executive high-risk watch', 'module' => 'Intelligence'], [

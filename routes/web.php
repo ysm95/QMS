@@ -80,6 +80,8 @@ Route::middleware('auth')->group(function () {
     Route::post('platform/notification-designs', [PlatformController::class, 'storeNotificationDesign'])->name('platform.notification-designs.store');
     Route::post('platform/notification-rules', [PlatformController::class, 'storeNotificationRule'])->name('platform.notification-rules.store');
     Route::post('platform/permission-templates', [PlatformController::class, 'storePermissionTemplate'])->name('platform.permission-templates.store');
+    Route::post('platform/numbering-rules', [PlatformController::class, 'storeNumberingRule'])->name('platform.numbering-rules.store');
+    Route::post('platform/configuration-packages', [PlatformController::class, 'storeConfigurationPackage'])->name('platform.configuration-packages.store');
     Route::post('platform/saved-views', [PlatformController::class, 'storeSavedView'])->name('platform.saved-views.store');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');

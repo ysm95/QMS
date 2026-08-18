@@ -133,6 +133,35 @@
       <button class="primary-button">Create permission template</button>
     </form>
 
+    <form class="panel config-form" method="POST" action="{{ route('platform.numbering-rules.store') }}">
+      @csrf
+      <h2>Numbering designer</h2>
+      <div class="form-grid two">
+        <label>Code<input name="code" placeholder="NUM-INC" required></label>
+        <label>Status<select name="status"><option>Active</option><option>Draft</option><option>Retired</option></select></label>
+        <label>Module<input name="module" placeholder="Incidents" required></label>
+        <label>Prefix<input name="prefix" placeholder="INC" required></label>
+        <label>Pattern<input name="pattern" value="{PREFIX}-{YYYY}-{SEQ:6}" required></label>
+        <label>Next sequence<input name="next_sequence" type="number" min="1" value="1" required></label>
+      </div>
+      <label class="inline-check"><input name="reset_annually" type="checkbox" value="1" checked> Reset annually</label>
+      <button class="primary-button">Create numbering rule</button>
+    </form>
+
+    <form class="panel config-form" method="POST" action="{{ route('platform.configuration-packages.store') }}">
+      @csrf
+      <h2>Configuration package</h2>
+      <div class="form-grid two">
+        <label>Code<input name="code" placeholder="CFG-UAT-001" required></label>
+        <label>Status<select name="status"><option>Draft</option><option>Validated</option><option>Approved</option><option>Published</option><option>Rolled back</option></select></label>
+        <label>Name<input name="name" placeholder="UAT baseline configuration" required></label>
+        <label>Effective date<input name="effective_date" type="date"></label>
+      </div>
+      <label>Package summary<textarea name="payload_summary" rows="2" placeholder="Forms, workflows, roles, numbering, reports"></textarea></label>
+      <label>Validation summary<textarea name="validation_summary" rows="2" placeholder="Dependency checks and impact preview"></textarea></label>
+      <button class="primary-button">Create package</button>
+    </form>
+
     <form class="panel config-form" method="POST" action="{{ route('platform.saved-views.store') }}">
       @csrf
       <h2>Create saved view</h2>
@@ -216,6 +245,42 @@
       <div class="table-panel"><table><thead><tr><th>Template</th><th>Status</th><th>Permissions</th><th>Default scopes</th></tr></thead><tbody>
         @foreach ($permissionTemplates as $template)
           <tr><td>{{ $template->name }}</td><td><span class="status-pill">{{ $template->status }}</span></td><td>{{ implode(', ', $template->permissions ?? []) }}</td><td>{{ implode(', ', $template->default_scopes ?? []) }}</td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Branding and system settings</h2><span class="status-pill">Control center</span></div>
+      <div class="table-panel"><table><thead><tr><th>Group</th><th>Key</th><th>Status</th><th>Value</th></tr></thead><tbody>
+        @foreach ($systemSettings as $setting)
+          <tr><td>{{ $setting->group }}</td><td>{{ $setting->key }}</td><td><span class="status-pill">{{ $setting->status }}</span></td><td>{{ $setting->is_sensitive ? 'Sensitive' : json_encode($setting->value) }}</td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Module licenses</h2><span class="status-pill">Feature control</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Status</th><th>Enabled</th><th>Expiry</th><th>Limits</th></tr></thead><tbody>
+        @foreach ($moduleLicenses as $license)
+          <tr><td>{{ $license->code }}</td><td>{{ $license->name }}</td><td><span class="status-pill">{{ $license->status }}</span></td><td>{{ $license->enabled ? 'Yes' : 'No' }}</td><td>{{ optional($license->expires_on)->format('Y-m-d') ?? 'Not set' }}</td><td>{{ json_encode($license->limits) }}</td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Numbering rules</h2><span class="status-pill">ID control</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Module</th><th>Prefix</th><th>Pattern</th><th>Next</th><th>Status</th></tr></thead><tbody>
+        @foreach ($numberingRules as $rule)
+          <tr><td>{{ $rule->code }}</td><td>{{ $rule->module }}</td><td>{{ $rule->prefix }}</td><td>{{ $rule->pattern }}</td><td>{{ $rule->next_sequence }}</td><td><span class="status-pill">{{ $rule->status }}</span></td></tr>
+        @endforeach
+      </tbody></table></div>
+    </article>
+
+    <article class="panel wide">
+      <div class="panel-header"><h2>Configuration packages</h2><span class="status-pill">Promotion ready</span></div>
+      <div class="table-panel"><table><thead><tr><th>Code</th><th>Name</th><th>Version</th><th>Status</th><th>Effective</th><th>Validation</th></tr></thead><tbody>
+        @foreach ($configurationPackages as $package)
+          <tr><td>{{ $package->code }}</td><td>{{ $package->name }}</td><td>v{{ $package->version }}</td><td><span class="status-pill">{{ $package->status }}</span></td><td>{{ optional($package->effective_date)->format('Y-m-d') ?? 'Not set' }}</td><td>{{ $package->validation_summary ?: 'Pending validation' }}</td></tr>
         @endforeach
       </tbody></table></div>
     </article>

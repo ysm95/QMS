@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Qms;
 use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
 use App\Models\QmsEmailDesign;
+use App\Models\QmsModuleLicense;
+use App\Models\QmsNumberingRule;
 use App\Models\QmsKeyUserAssignment;
 use App\Models\QmsAudit;
 use App\Models\QmsDepartment;
@@ -18,6 +20,7 @@ use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecommendation;
+use App\Models\QmsConfigurationPackage;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
@@ -63,6 +66,9 @@ class AdminController extends Controller
                 'Permission templates' => QmsPermissionTemplate::count(),
                 'Key users' => QmsKeyUserAssignment::count(),
                 'Recommendations' => QmsRecommendation::count(),
+                'Licenses' => QmsModuleLicense::count(),
+                'Numbering rules' => QmsNumberingRule::count(),
+                'Config packages' => QmsConfigurationPackage::count(),
             ],
         ]);
     }

@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
+use App\Models\QmsConfigurationPackage;
 use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsModuleLicense;
+use App\Models\QmsNumberingRule;
 use App\Models\QmsInvestigation;
 use App\Models\QmsLocation;
 use App\Models\QmsManagementReview;
@@ -45,6 +48,9 @@ class DashboardController extends Controller
             QmsWorkflowDefinition::exists(),
             QmsReportDesign::exists(),
             QmsNotificationDesign::exists(),
+            QmsModuleLicense::exists(),
+            QmsNumberingRule::exists(),
+            QmsConfigurationPackage::exists(),
             QmsRecordLink::exists(),
             QmsAiProvider::exists(),
         ];
