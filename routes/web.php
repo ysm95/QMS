@@ -73,6 +73,8 @@ Route::middleware('auth')->group(function () {
     Route::get('platform', [PlatformController::class, 'index'])->name('platform.index');
     Route::post('platform/forms', [PlatformController::class, 'storeForm'])->name('platform.forms.store');
     Route::post('platform/workflows', [PlatformController::class, 'storeWorkflow'])->name('platform.workflows.store');
+    Route::post('platform/report-designs', [PlatformController::class, 'storeReportDesign'])->name('platform.report-designs.store');
+    Route::post('platform/notification-designs', [PlatformController::class, 'storeNotificationDesign'])->name('platform.notification-designs.store');
     Route::post('platform/saved-views', [PlatformController::class, 'storeSavedView'])->name('platform.saved-views.store');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');

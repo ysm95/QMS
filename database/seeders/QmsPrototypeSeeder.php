@@ -11,9 +11,11 @@ use App\Models\QmsFormDefinition;
 use App\Models\QmsInvestigation;
 use App\Models\QmsManagementReview;
 use App\Models\QmsNotification;
+use App\Models\QmsNotificationDesign;
 use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsRecordLink;
+use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSavedView;
 use App\Models\QmsSupplier;
@@ -298,6 +300,76 @@ class QmsPrototypeSeeder extends Seeder
             'stages' => ['Draft', 'Review', 'Approved', 'Published', 'Archived'],
             'rules' => ['published_requires_version' => true, 'review_date_required' => true],
             'change_note' => 'Documented information lifecycle.',
+        ]);
+
+        QmsReportDesign::updateOrCreate(['code' => 'RPT-OCC-001'], [
+            'name' => 'Occurrence Register and Risk Summary',
+            'version' => 1,
+            'module' => 'Occurrences',
+            'status' => 'Published',
+            'layout' => [
+                'sections' => ['Header', 'Filters', 'Occurrence register', 'Risk summary', 'CAPA summary', 'Audit evidence'],
+                'columns' => ['Reference', 'Title', 'Type', 'Stage', 'Risk', 'Reported By', 'Owner', 'Due Date'],
+                'grouping' => ['Workflow stage', 'Risk rating', 'Department'],
+                'confidentiality' => 'Mask anonymous and confidential reporter identity unless authorized.',
+            ],
+            'data_sources' => ['qms_occurrences', 'qms_actions', 'qms_risks', 'qms_audit_logs'],
+            'output_formats' => ['Screen', 'CSV', 'PDF', 'Excel'],
+            'change_note' => 'Default production occurrence register design.',
+        ]);
+
+        QmsReportDesign::updateOrCreate(['code' => 'RPT-CAPA-001'], [
+            'name' => 'CAPA Effectiveness and Overdue Report',
+            'version' => 1,
+            'module' => 'Actions',
+            'status' => 'Published',
+            'layout' => [
+                'sections' => ['Header', 'Overdue actions', 'Verification queue', 'Effectiveness review', 'Closure evidence'],
+                'columns' => ['Reference', 'Source', 'Action', 'Owner', 'Priority', 'Status', 'Due Date'],
+                'grouping' => ['Owner', 'Priority', 'Status'],
+                'confidentiality' => 'Show source references only to authorized action owners.',
+            ],
+            'data_sources' => ['qms_actions', 'qms_occurrences', 'qms_record_notes'],
+            'output_formats' => ['Screen', 'CSV', 'PDF'],
+            'change_note' => 'Default production CAPA design.',
+        ]);
+
+        QmsNotificationDesign::updateOrCreate(['code' => 'MSG-OCC-001'], [
+            'name' => 'Occurrence Submitted',
+            'version' => 1,
+            'module' => 'Occurrences',
+            'event_trigger' => 'occurrence.submitted',
+            'status' => 'Published',
+            'recipients' => [
+                'to' => ['HSE Reviewer', 'Occurrence Owner'],
+                'cc' => ['Reporter', 'Department Manager'],
+            ],
+            'conditions' => [
+                'rules' => ['status:Submitted', 'risk:any'],
+                'restricted_identity' => 'Respect anonymous/confidential flags.',
+            ],
+            'subject_template' => '[{{reference}}] {{title}} requires QMS review',
+            'body_template' => 'Record {{reference}} is waiting for {{stage}}. Review location, risk, evidence, and immediate action.',
+            'change_note' => 'Default occurrence submitted message.',
+        ]);
+
+        QmsNotificationDesign::updateOrCreate(['code' => 'MSG-CAPA-001'], [
+            'name' => 'CAPA Due or Overdue',
+            'version' => 1,
+            'module' => 'Actions',
+            'event_trigger' => 'action.due',
+            'status' => 'Published',
+            'recipients' => [
+                'to' => ['Action Owner'],
+                'cc' => ['QMS Manager', 'Source Record Owner'],
+            ],
+            'conditions' => [
+                'rules' => ['status:not Closed', 'due_date:within 3 days or overdue'],
+                'restricted_identity' => 'Respect confidential source records.',
+            ],
+            'subject_template' => '[{{reference}}] CAPA action requires attention',
+            'body_template' => 'Action {{reference}} is {{status}} and due on {{due_date}}. Update progress, evidence, or verification.',
+            'change_note' => 'Default CAPA reminder and escalation message.',
         ]);
 
         QmsSavedView::updateOrCreate(['name' => 'Executive high-risk watch', 'module' => 'Intelligence'], [

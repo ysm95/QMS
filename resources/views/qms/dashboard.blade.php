@@ -22,6 +22,8 @@
     <article class="metric"><span>Public intake</span><strong>{{ $metrics['publicReports'] }}</strong><small>Open external reports</small></article>
     <article class="metric"><span>Training due</span><strong>{{ $metrics['trainingDue'] }}</strong><small>Next 45 days</small></article>
     <article class="metric"><span>Supplier watch</span><strong>{{ $metrics['supplierWatch'] }}</strong><small>High risk vendors</small></article>
+    <article class="metric"><span>Report designs</span><strong>{{ $metrics['reportDesigns'] }}</strong><small>Published layouts</small></article>
+    <article class="metric"><span>Notification rules</span><strong>{{ $metrics['notificationDesigns'] }}</strong><small>Published templates</small></article>
   </div>
 
   <div class="content-grid">
@@ -49,8 +51,9 @@
       <ul class="coverage-list">
         <li><strong>ADMIN</strong><span>Users, departments, locations, groups and access concepts</span></li>
         <li><strong>FORMS</strong><span>Versioned forms, sections, required fields and field labels</span></li>
+        <li><strong>REPORT</strong><span>Designer-managed layouts, data sources and exports</span></li>
         <li><strong>ROUTE</strong><span>Workflow stages and routing rules are platform managed</span></li>
-        <li><strong>NOTICE</strong><span>Notification inbox and recipient logic foundation</span></li>
+        <li><strong>NOTICE</strong><span>Template-driven recipients, conditions and message content</span></li>
         <li><strong>AUDIT</strong><span>Traceable record updates, evidence, actions and exports</span></li>
       </ul>
     </article>

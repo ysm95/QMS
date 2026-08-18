@@ -17,10 +17,12 @@ use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPublicReport;
 use App\Models\QmsRecordLink;
+use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
 use App\Models\QmsTrainingRecord;
 use App\Models\QmsWorkflowDefinition;
+use App\Models\QmsNotificationDesign;
 use App\Models\User;
 
 class DashboardController extends Controller
@@ -41,6 +43,8 @@ class DashboardController extends Controller
             QmsSupplier::exists(),
             QmsFormDefinition::exists(),
             QmsWorkflowDefinition::exists(),
+            QmsReportDesign::exists(),
+            QmsNotificationDesign::exists(),
             QmsRecordLink::exists(),
             QmsAiProvider::exists(),
         ];
@@ -60,6 +64,8 @@ class DashboardController extends Controller
                 'trainingDue' => QmsTrainingRecord::where('expires_on', '<=', now()->addDays(45)->toDateString())->count(),
                 'supplierWatch' => QmsSupplier::whereIn('risk_rating', ['High', 'Critical'])->count(),
                 'objectivesWatch' => QmsObjective::whereIn('status', ['At risk', 'Off track'])->count(),
+                'reportDesigns' => QmsReportDesign::where('status', 'Published')->count(),
+                'notificationDesigns' => QmsNotificationDesign::where('status', 'Published')->count(),
             ],
             'workflowStages' => $workflowStages,
             'occurrences' => QmsOccurrence::latest()->limit(6)->get(),

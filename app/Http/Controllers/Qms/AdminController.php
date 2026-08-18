@@ -9,8 +9,10 @@ use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsLocation;
 use App\Models\QmsManagementReview;
+use App\Models\QmsNotificationDesign;
 use App\Models\QmsObjective;
 use App\Models\QmsOccurrence;
+use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
 use App\Models\QmsSupplier;
 use App\Models\QmsTrainingRecord;
@@ -47,6 +49,8 @@ class AdminController extends Controller
                 'Reviews' => QmsManagementReview::count(),
                 'Training' => QmsTrainingRecord::count(),
                 'Suppliers' => QmsSupplier::count(),
+                'Report designs' => QmsReportDesign::count(),
+                'Notification designs' => QmsNotificationDesign::count(),
             ],
         ]);
     }
