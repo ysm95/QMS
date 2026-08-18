@@ -29,6 +29,7 @@
         <a class="nav-item {{ request()->routeIs('management-reviews.*') ? 'active' : '' }}" href="{{ route('management-reviews.index') }}">Management Review</a>
         <a class="nav-item {{ request()->routeIs('training.*') ? 'active' : '' }}" href="{{ route('training.index') }}">Training</a>
         <a class="nav-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}" href="{{ route('suppliers.index') }}">Suppliers</a>
+        <a class="nav-item {{ request()->routeIs('public-reports.*') ? 'active' : '' }}" href="{{ route('public-reports.index') }}">Public Intake</a>
         <a class="nav-item {{ request()->routeIs('platform.*') ? 'active' : '' }}" href="{{ route('platform.index') }}">Platform Config</a>
         <a class="nav-item {{ request()->routeIs('ai.*') ? 'active' : '' }}" href="{{ route('ai.index') }}">Controlled AI</a>
         <a class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">Notifications</a>

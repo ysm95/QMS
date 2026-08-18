@@ -69,7 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::get('management-reviews', [ManagementReviewController::class, 'index'])->name('management-reviews.index');
     Route::get('training', [TrainingController::class, 'index'])->name('training.index');
     Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('public-reports', [PublicReportController::class, 'index'])->name('public-reports.index');
     Route::get('platform', [PlatformController::class, 'index'])->name('platform.index');
+    Route::post('platform/forms', [PlatformController::class, 'storeForm'])->name('platform.forms.store');
+    Route::post('platform/workflows', [PlatformController::class, 'storeWorkflow'])->name('platform.workflows.store');
+    Route::post('platform/saved-views', [PlatformController::class, 'storeSavedView'])->name('platform.saved-views.store');
     Route::get('exports/occurrences', [ExportController::class, 'occurrences'])->name('exports.occurrences');
     Route::get('exports/actions', [ExportController::class, 'actions'])->name('exports.actions');
     Route::get('exports/risks', [ExportController::class, 'risks'])->name('exports.risks');

@@ -8,6 +8,34 @@ use Illuminate\Http\Request;
 
 class PublicReportController extends Controller
 {
+    public function index(Request $request)
+    {
+        $reports = QmsPublicReport::query()->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $reports->where(function ($builder) use ($search) {
+                $builder->where('reference', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $reports->where('status', $request->string('status'));
+        }
+
+        return view('qms.public.index', [
+            'reports' => $reports->paginate(12)->withQueryString(),
+            'metrics' => [
+                'new' => QmsPublicReport::where('status', 'New')->count(),
+                'confidential' => QmsPublicReport::where('confidential', true)->count(),
+                'anonymous' => QmsPublicReport::where('anonymous', true)->count(),
+            ],
+        ]);
+    }
+
     public function create()
     {
         return view('qms.public.report');

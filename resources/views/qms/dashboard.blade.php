@@ -4,10 +4,13 @@
 <section class="view active-view">
   <div class="page-title">
     <div>
-      <p class="eyebrow">BRSD Phase 2 Core</p>
+      <p class="eyebrow">Live enterprise QMS</p>
       <h1>Command dashboard</h1>
     </div>
-    <a class="primary-button" href="{{ route('occurrences.create') }}">New occurrence</a>
+    <div class="button-row">
+      <a class="secondary-button" href="{{ route('public-reports.index') }}">Public intake</a>
+      <a class="primary-button" href="{{ route('occurrences.create') }}">New occurrence</a>
+    </div>
   </div>
 
   <div class="metric-grid">
@@ -16,13 +19,16 @@
     <article class="metric"><span>High risks</span><strong>{{ $metrics['highRisks'] }}</strong><small>Risk register</small></article>
     <article class="metric"><span>Audit readiness</span><strong>{{ $metrics['auditReadiness'] }}%</strong><small>BRSD evidence mapping</small></article>
     <article class="metric"><span>Unread alerts</span><strong>{{ $metrics['unreadNotifications'] }}</strong><small>Notification inbox</small></article>
+    <article class="metric"><span>Public intake</span><strong>{{ $metrics['publicReports'] }}</strong><small>Open external reports</small></article>
+    <article class="metric"><span>Training due</span><strong>{{ $metrics['trainingDue'] }}</strong><small>Next 45 days</small></article>
+    <article class="metric"><span>Supplier watch</span><strong>{{ $metrics['supplierWatch'] }}</strong><small>High risk vendors</small></article>
   </div>
 
   <div class="content-grid">
     <article class="panel wide">
       <div class="panel-header"><h2>Occurrence workflow board</h2><span class="status-pill">Real records</span></div>
       <div class="kanban">
-        @foreach (['Submitted', 'Screening', 'Investigation', 'CAPA'] as $stage)
+        @foreach ($workflowStages as $stage)
           <div class="lane">
             <h3>{{ $stage }}</h3>
             @foreach ($occurrences->where('workflow_stage', $stage)->take(3) as $occurrence)
@@ -30,6 +36,9 @@
                 {{ $occurrence->title }}<span>{{ $occurrence->reference }}</span>
               </a>
             @endforeach
+            @if ($occurrences->where('workflow_stage', $stage)->isEmpty())
+              <div class="empty-lane">No records</div>
+            @endif
           </div>
         @endforeach
       </div>
@@ -38,11 +47,11 @@
     <article class="panel">
       <div class="panel-header"><h2>BRSD coverage</h2><span class="status-pill success">Core</span></div>
       <ul class="coverage-list">
-        <li><strong>FR-001</strong><span>Structured occurrence reporting</span></li>
-        <li><strong>FR-002</strong><span>Visible workflow status model</span></li>
-        <li><strong>SMS-001</strong><span>Safety occurrence foundation</span></li>
-        <li><strong>UX-003</strong><span>Record workspace</span></li>
-        <li><strong>SEC-001</strong><span>Authenticated access</span></li>
+        <li><strong>ADMIN</strong><span>Users, departments, locations, groups and access concepts</span></li>
+        <li><strong>FORMS</strong><span>Versioned forms, sections, required fields and field labels</span></li>
+        <li><strong>ROUTE</strong><span>Workflow stages and routing rules are platform managed</span></li>
+        <li><strong>NOTICE</strong><span>Notification inbox and recipient logic foundation</span></li>
+        <li><strong>AUDIT</strong><span>Traceable record updates, evidence, actions and exports</span></li>
       </ul>
     </article>
 
@@ -78,6 +87,36 @@
       <ul class="timeline">
         @foreach ($notifications as $notification)
           <li><strong>{{ $notification->title }}</strong><span>{{ $notification->source_reference ?? 'QMS' }} - {{ $notification->created_at->format('Y-m-d H:i') }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Public reports</h2><a class="secondary-button" href="{{ route('public-reports.index') }}">Review</a></div>
+      <ul class="timeline">
+        @foreach ($publicReports as $report)
+          <li><strong>{{ $report->reference }}</strong><span>{{ $report->category }} - {{ $report->confidential ? 'Confidential' : $report->status }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Training watch</h2><a class="secondary-button" href="{{ route('training.index') }}">Training</a></div>
+      <ul class="timeline">
+        @foreach ($training as $record)
+          <li><strong>{{ $record->reference }}</strong><span>{{ $record->person_name }} - {{ $record->status }}</span></li>
+        @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Objectives / suppliers</h2><a class="secondary-button" href="{{ route('objectives.index') }}">Objectives</a></div>
+      <ul class="timeline">
+        @foreach ($objectives as $objective)
+          <li><strong>{{ $objective->reference }}</strong><span>{{ $objective->title }} - {{ $objective->status }}</span></li>
+        @endforeach
+        @foreach ($suppliers as $supplier)
+          <li><strong>{{ $supplier->reference }}</strong><span>{{ $supplier->name }} - {{ $supplier->risk_rating }}</span></li>
         @endforeach
       </ul>
     </article>
