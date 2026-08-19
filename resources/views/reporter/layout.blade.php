@@ -11,7 +11,11 @@
   <header class="reporter-topbar">
     <a href="{{ route('reporter.home') }}" aria-label="Back to reporter home">‹</a>
     <strong>@yield('screen-title', 'QMS Reporter')</strong>
-    <span>{{ auth()->user()?->name ?? 'Guest' }}</span>
+    @auth
+      <a class="reporter-help-link" href="{{ route('feedback.index') }}">Help</a>
+    @else
+      <span>{{ auth()->user()?->name ?? 'Guest' }}</span>
+    @endauth
   </header>
 
   <main class="reporter-shell">

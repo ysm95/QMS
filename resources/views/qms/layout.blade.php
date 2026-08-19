@@ -16,9 +16,10 @@
       ['label' => 'Home', 'route' => 'qms.dashboard', 'active' => ['qms.*']],
       ['label' => 'My Work', 'route' => 'my-work.index', 'active' => ['my-work.*']],
       ['label' => 'Reports', 'route' => 'reporting.index', 'active' => ['reporting.*', 'public-reports.*'], 'roles' => ['Super Admin', 'Safety Admin', 'Quality Admin', 'HSE Admin']],
-      ['label' => 'Safety', 'route' => 'incidents.index', 'active' => ['incidents.*', 'occurrences.*', 'actions.*', 'investigations.*', 'risks.*'], 'roles' => ['Super Admin', 'Safety Admin', 'HSE Admin', 'Action User']],
-      ['label' => 'Quality', 'route' => 'documents.index', 'active' => ['documents.*', 'objectives.*', 'training.*', 'suppliers.*'], 'roles' => ['Super Admin', 'Quality Admin']],
-      ['label' => 'Assurance', 'route' => 'audits.index', 'active' => ['audits.*', 'compliance.*', 'management-reviews.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin']],
+      ['label' => 'Safety & Risk', 'route' => 'incidents.index', 'active' => ['incidents.*', 'occurrences.*', 'investigations.*', 'risks.*', 'safety-promotions.*'], 'roles' => ['Super Admin', 'Safety Admin', 'HSE Admin', 'Action User']],
+      ['label' => 'Quality & Improvement', 'route' => 'nonconformances.index', 'active' => ['nonconformances.*', 'capa.*', 'actions.*', 'objectives.*', 'suppliers.*'], 'roles' => ['Super Admin', 'Quality Admin']],
+      ['label' => 'Assurance', 'route' => 'audits.index', 'active' => ['audits.*', 'inspections.*', 'compliance.*', 'management-reviews.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin']],
+      ['label' => 'Knowledge', 'route' => 'documents.index', 'active' => ['documents.*', 'training.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin', 'HSE Admin']],
       ['label' => 'Analytics', 'route' => 'intelligence.index', 'active' => ['intelligence.*', 'search.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin', 'HSE Admin']],
       ['label' => 'Administration', 'route' => 'admin.index', 'active' => ['admin.*', 'platform.*', 'ai.*'], 'admin' => true],
     ];
@@ -27,23 +28,29 @@
         ['Reporting workspace', 'reporting.index'],
         ['Public intake', 'public-reports.index'],
       ],
-      'Safety' => [
+      'Safety & Risk' => [
         ['Incidents', 'incidents.index'],
         ['Occurrences', 'occurrences.index'],
-        ['Actions', 'actions.index'],
         ['Investigations', 'investigations.index'],
         ['Risks', 'risks.index'],
+        ['Lessons learned', 'safety-promotions.index'],
       ],
-      'Quality' => [
-        ['Documents', 'documents.index'],
+      'Quality & Improvement' => [
+        ['Nonconformances', 'nonconformances.index'],
+        ['CAPA', 'capa.index'],
+        ['Actions', 'actions.index'],
         ['Objectives', 'objectives.index'],
-        ['Training', 'training.index'],
         ['Suppliers', 'suppliers.index'],
       ],
       'Assurance' => [
         ['Audits', 'audits.index'],
+        ['Inspections', 'inspections.index'],
         ['Compliance', 'compliance.index'],
         ['Management review', 'management-reviews.index'],
+      ],
+      'Knowledge' => [
+        ['Documents', 'documents.index'],
+        ['Training', 'training.index'],
       ],
       'Administration' => [
         ['Control center', 'admin.index'],
@@ -88,8 +95,18 @@
           </form>
         </div>
         <div class="topbar-actions">
+          <details class="create-menu">
+            <summary class="primary-button">Create</summary>
+            <div>
+              <a href="{{ route('reporting.index') }}#new-report">Report</a>
+              <a href="{{ route('actions.index') }}">Action</a>
+              <a href="{{ route('audits.index') }}">Audit</a>
+              <a href="{{ route('inspections.index') }}">Inspection</a>
+              <a href="{{ route('nonconformances.index') }}">NCR</a>
+            </div>
+          </details>
+          <a class="secondary-button" href="{{ route('feedback.index') }}">Help</a>
           <a class="secondary-button" href="{{ route('notifications.index', ['status' => 'unread']) }}">Notifications</a>
-          <a class="primary-button" href="{{ route('reporting.index') }}">Report</a>
           <form method="POST" action="{{ route('logout') }}">@csrf<button class="secondary-button">Logout</button></form>
         </div>
       </header>

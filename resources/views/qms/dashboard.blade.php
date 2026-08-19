@@ -4,12 +4,12 @@
 <section class="view active-view">
   <div class="page-title">
     <div>
-      <p class="eyebrow">Live enterprise QMS</p>
-      <h1>Command dashboard</h1>
+      <p class="eyebrow">Role-aware home</p>
+      <h1>What needs attention</h1>
     </div>
     <div class="button-row">
       <a class="secondary-button" href="{{ route('public-reports.index') }}">Public intake</a>
-      <a class="primary-button" href="{{ route('reporting.index') }}">Submit report</a>
+      <a class="primary-button" href="{{ route('reporting.index') }}">Review reports</a>
     </div>
   </div>
 
@@ -19,7 +19,11 @@
     <article class="metric"><span>Open occurrences</span><strong>{{ $metrics['openOccurrences'] }}</strong><small>Legacy workspace</small></article>
     <article class="metric"><span>Overdue CAPA</span><strong>{{ $metrics['overdueActions'] }}</strong><small>Owner action queue</small></article>
     <article class="metric"><span>High risks</span><strong>{{ $metrics['highRisks'] }}</strong><small>Risk register</small></article>
-    <article class="metric"><span>Audit readiness</span><strong>{{ $metrics['auditReadiness'] }}%</strong><small>BRSD evidence mapping</small></article>
+    <article class="metric"><span>Open findings</span><strong>{{ $metrics['openFindings'] }}</strong><small>Audit and inspection</small></article>
+    <article class="metric"><span>Open NCR</span><strong>{{ $metrics['openNcr'] }}</strong><small>Requirement evidence</small></article>
+    <article class="metric"><span>Open CAPA</span><strong>{{ $metrics['openCapa'] }}</strong><small>Effectiveness pending</small></article>
+    <article class="metric"><span>Compliance changes</span><strong>{{ $metrics['complianceChanges'] }}</strong><small>Impact assessment</small></article>
+    <article class="metric"><span>Audit readiness</span><strong>{{ $metrics['auditReadiness'] }}%</strong><small>Evidence mapping</small></article>
     <article class="metric"><span>Unread alerts</span><strong>{{ $metrics['unreadNotifications'] }}</strong><small>Notification inbox</small></article>
     <article class="metric"><span>Public intake</span><strong>{{ $metrics['publicReports'] }}</strong><small>Open external reports</small></article>
     <article class="metric"><span>Training due</span><strong>{{ $metrics['trainingDue'] }}</strong><small>Next 45 days</small></article>
@@ -30,7 +34,7 @@
 
   <div class="content-grid">
     <article class="panel wide">
-      <div class="panel-header"><h2>Reporting and incident board</h2><span class="status-pill">Separated domains</span></div>
+      <div class="panel-header"><h2>Reports, incidents and assurance</h2><span class="status-pill">Original report preserved</span></div>
       <div class="content-grid compact-grid">
         <div>
           <h3>Recent reports</h3>
@@ -49,7 +53,7 @@
           </ul>
         </div>
       </div>
-      <h3>Legacy occurrence workflow board</h3>
+      <h3>Safety workflow board</h3>
       <div class="kanban">
         @foreach ($workflowStages as $stage)
           <div class="lane">
@@ -68,14 +72,14 @@
     </article>
 
     <article class="panel">
-      <div class="panel-header"><h2>BRSD coverage</h2><span class="status-pill success">Core</span></div>
+      <div class="panel-header"><h2>v7 product coverage</h2><span class="status-pill success">Core</span></div>
       <ul class="coverage-list">
-        <li><strong>ADMIN</strong><span>Users, departments, locations, groups and access concepts</span></li>
-        <li><strong>FORMS</strong><span>Versioned forms, sections, required fields and field labels</span></li>
-        <li><strong>REPORT</strong><span>Designer-managed layouts, data sources and exports</span></li>
-        <li><strong>ROUTE</strong><span>Workflow stages and routing rules are platform managed</span></li>
-        <li><strong>NOTICE</strong><span>Template-driven recipients, conditions and message content</span></li>
-        <li><strong>AUDIT</strong><span>Traceable record updates, evidence, actions and exports</span></li>
+        <li><strong>SHELL</strong><span>One QMS shell with role-aware navigation, search, create, help and notifications</span></li>
+        <li><strong>TRUST</strong><span>Reporter experience protects confidential/anonymous submissions and hides internal workflow</span></li>
+        <li><strong>REPORT</strong><span>Original report remains separate from enriched incident and safety records</span></li>
+        <li><strong>ASSURE</strong><span>Audit, inspection, finding, NCR and CAPA are separate controlled concepts</span></li>
+        <li><strong>STD</strong><span>Standards and taxonomy are versioned records, not hard-coded source constants</span></li>
+        <li><strong>AI</strong><span>AI remains embedded, permission-aware and blocked until paid secured provider approval</span></li>
       </ul>
     </article>
 
@@ -85,6 +89,28 @@
         @foreach ($audits as $audit)
           <li><strong>{{ $audit->reference }}</strong><span>{{ $audit->title }} - {{ $audit->status }}</span></li>
         @endforeach
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Inspection findings</h2><a class="secondary-button" href="{{ route('inspections.index') }}">Inspections</a></div>
+      <ul class="timeline">
+        @forelse ($findings as $finding)
+          <li><strong>{{ $finding->reference }}</strong><span>{{ $finding->finding_type }} - {{ $finding->status }}</span></li>
+        @empty
+          <li><strong>Clear</strong><span>No open findings require attention.</span></li>
+        @endforelse
+      </ul>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><h2>Lessons learned</h2><a class="secondary-button" href="{{ route('safety-promotions.index') }}">Lessons</a></div>
+      <ul class="timeline">
+        @forelse ($lessons as $lesson)
+          <li><strong>{{ $lesson->reference }}</strong><span>{{ $lesson->approval_status }} - {{ $lesson->title }}</span></li>
+        @empty
+          <li><strong>No draft lessons</strong><span>Safety promotion starts after confidentiality review.</span></li>
+        @endforelse
       </ul>
     </article>
 

@@ -11,8 +11,11 @@
   --warning: #b7791f;
   --danger: #b42318;
   --success: #12805c;
+  --info: #0969a2;
+  --focus: #0f9b8e;
   --shadow: 0 16px 40px rgba(15, 39, 71, 0.09);
   --radius: 8px;
+  --control-height: 38px;
 }
 
 * {
@@ -200,11 +203,56 @@ button {
 .primary-button,
 .secondary-button,
 .icon-button {
-  min-height: 38px;
+  min-height: var(--control-height);
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 8px 14px;
   font-weight: 700;
+}
+
+.create-menu {
+  position: relative;
+}
+
+.create-menu summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.create-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.create-menu div {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 8px);
+  min-width: 190px;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  z-index: 30;
+}
+
+.create-menu:not([open]) div {
+  display: none;
+}
+
+.create-menu a {
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.create-menu a:hover {
+  background: var(--surface-soft);
 }
 
 .primary-button {

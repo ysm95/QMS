@@ -7,6 +7,8 @@ use App\Models\QmsAccessScope;
 use App\Models\QmsAttachment;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
+use App\Models\QmsCapaCase;
+use App\Models\QmsComplianceChange;
 use App\Models\QmsComplianceFramework;
 use App\Models\QmsConfigurationPackage;
 use App\Models\QmsDataSource;
@@ -14,8 +16,11 @@ use App\Models\QmsDocument;
 use App\Models\QmsDomainPack;
 use App\Models\QmsEmailDesign;
 use App\Models\QmsElectronicSignature;
+use App\Models\QmsFeedbackItem;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsFinding;
 use App\Models\QmsIncident;
+use App\Models\QmsInspection;
 use App\Models\QmsInvestigation;
 use App\Models\QmsIntegrationEvent;
 use App\Models\QmsKeyUserAssignment;
@@ -26,22 +31,28 @@ use App\Models\QmsNotificationDesign;
 use App\Models\QmsNotificationGroup;
 use App\Models\QmsNotificationRule;
 use App\Models\QmsNotificationTemplate;
+use App\Models\QmsNonconformance;
 use App\Models\QmsNumberingRule;
 use App\Models\QmsObjective;
 use App\Models\QmsOfflineProfile;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPermissionTemplate;
 use App\Models\QmsRecordLink;
+use App\Models\QmsRecordSimilarity;
 use App\Models\QmsRecommendation;
 use App\Models\QmsReport;
 use App\Models\QmsRetentionRule;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
+use App\Models\QmsSafetyPromotion;
 use App\Models\QmsSavedView;
+use App\Models\QmsStandard;
+use App\Models\QmsStandardRequirement;
 use App\Models\QmsSupplier;
 use App\Models\QmsSyncAdapter;
 use App\Models\QmsSystemMonitor;
 use App\Models\QmsSystemSetting;
+use App\Models\QmsTaxonomyTerm;
 use App\Models\QmsTrainingRecord;
 use App\Models\QmsWorkflowDefinition;
 use App\Models\User;
@@ -175,10 +186,73 @@ class QmsPrototypeSeeder extends Seeder
 
         QmsAudit::updateOrCreate(['reference' => 'AUD-2026-00008'], [
             'title' => 'August internal QMS/SMS assurance audit',
-            'standard' => 'ISO 9001 / SMS',
+            'standard' => 'ISO 9001:2015 / ICAO SMS',
             'lead_auditor' => 'Quality Admin',
             'status' => 'Planned',
             'scheduled_date' => now()->addDays(14)->toDateString(),
+        ]);
+
+        $inspection = QmsInspection::updateOrCreate(['reference' => 'INSP-2026-00014'], [
+            'title' => 'Ramp FOD and GSE control inspection',
+            'inspection_type' => 'Ramp inspection',
+            'station' => 'MCT',
+            'inspector' => 'HSE Reviewer',
+            'status' => 'In progress',
+            'passed_count' => 12,
+            'failed_count' => 1,
+            'not_applicable_count' => 2,
+            'checklist_snapshot' => [
+                'version' => 1,
+                'items' => ['FOD controls', 'GSE parking', 'Chocks', 'PPE', 'Housekeeping'],
+            ],
+            'evidence_summary' => ['photos' => 1, 'actions_created' => 1],
+            'scheduled_date' => now()->toDateString(),
+        ]);
+
+        QmsFinding::updateOrCreate(['reference' => 'FND-2026-00031'], [
+            'source_type' => QmsInspection::class,
+            'source_id' => $inspection->id,
+            'source_reference' => $inspection->reference,
+            'finding_type' => 'Observation',
+            'classification' => 'Ground operations',
+            'criterion' => 'Internal ramp housekeeping checklist',
+            'objective_evidence' => 'One unsecured item observed in the marked GSE staging area during inspection.',
+            'finding_statement' => 'Ramp housekeeping verification was incomplete in one inspected staging area.',
+            'owner' => 'Ground Operations',
+            'status' => 'Open',
+        ]);
+
+        QmsNonconformance::updateOrCreate(['reference' => 'NCR-2026-00019'], [
+            'requirement_reference' => 'ORG-QMS-AUDIT-01',
+            'objective_evidence' => 'Audit sample found one temporary-work checklist without supervisor verification evidence.',
+            'nonconformity_statement' => 'The temporary-work control process was not fully implemented for the sampled work package.',
+            'source' => 'Internal audit',
+            'classification' => 'Process nonconformance',
+            'severity' => 'Medium',
+            'containment' => 'Supervisor review completed for the affected work package.',
+            'correction' => 'Checklist evidence was completed and stored against the work record.',
+            'owner' => 'Engineering',
+            'due_date' => now()->addDays(21)->toDateString(),
+            'root_cause_required' => true,
+            'corrective_action_required' => true,
+            'effectiveness_required' => true,
+            'closure_authority' => 'Quality Manager',
+            'status' => 'Root cause',
+        ]);
+
+        QmsCapaCase::updateOrCreate(['reference' => 'CAPA-CASE-2026-00007'], [
+            'source_reference' => 'NCR-2026-00019',
+            'problem_statement' => 'Temporary work verification evidence is not consistently captured before work starts.',
+            'containment' => 'Affected work packages reviewed and supervisors briefed.',
+            'root_cause_tools' => ['5 Whys', 'Barrier analysis'],
+            'root_cause_statement' => 'Pre-task verification responsibility was understood but not reinforced by the checklist workflow.',
+            'corrective_action_plan' => 'Update checklist, add supervisor prompt, and review three subsequent work packages.',
+            'phase' => 'Implementation',
+            'owner' => 'Quality',
+            'due_date' => now()->addDays(30)->toDateString(),
+            'effectiveness_criteria' => 'Three consecutive sampled work packages include verification evidence before release.',
+            'effectiveness_due_date' => now()->addDays(60)->toDateString(),
+            'status' => 'Open',
         ]);
 
         QmsRisk::updateOrCreate(['reference' => 'RSK-2026-00031'], [
@@ -281,6 +355,87 @@ class QmsPrototypeSeeder extends Seeder
                 'Improvement and corrective action',
             ],
         ]);
+
+        $standards = [
+            ['ICAO-SMS', 'ICAO Safety Management System Concepts', 'ICAO', 'Aviation', 'Annex 19 / SMM mapping', 'Reference model', null, null, 'Safety', 'https://www.icao.int/safety-management/SMI/SMM'],
+            ['ISO-9001-2015', 'Quality management systems requirements', 'ISO', 'International', '2015', 'Current', '2015-09-01', null, 'Quality', 'https://www.iso.org/standard/62085.html'],
+            ['ISO-9001-2026', 'Quality management systems requirements', 'ISO', 'International', '2026', 'Under publication', null, '2027-09-01', 'Quality', 'https://www.iso.org/standard/88464.html'],
+            ['ISO-14001-2026', 'Environmental management systems', 'ISO', 'International', '2026', 'Published', '2026-04-15', null, 'HSE', 'https://www.iso.org/standard/14001'],
+            ['ISO-19011-2026', 'Guidelines for auditing management systems', 'ISO', 'International', '2026', 'Published', '2026-05-01', null, 'Assurance', 'https://www.iso.org/standard/19011'],
+            ['ISO-45001-2018', 'Occupational health and safety management systems', 'ISO', 'International', '2018', 'Current', '2018-03-01', null, 'HSE', 'https://www.iso.org/standard/63787.html'],
+        ];
+
+        foreach ($standards as [$code, $title, $issuer, $jurisdiction, $edition, $status, $effectiveDate, $transitionDeadline, $owner, $sourceUrl]) {
+            $standard = QmsStandard::updateOrCreate(['code' => $code], [
+                'title' => $title,
+                'issuer' => $issuer,
+                'jurisdiction' => $jurisdiction,
+                'edition' => $edition,
+                'publication_status' => $status,
+                'effective_date' => $effectiveDate,
+                'transition_deadline' => $transitionDeadline,
+                'applicability' => 'Configured by organization scope and licensed reference material.',
+                'owner' => $owner,
+                'source_url' => $sourceUrl,
+                'document_reference' => null,
+                'change_history' => [
+                    ['date' => now()->toDateString(), 'note' => 'Registered as metadata only; no licensed clause text stored.'],
+                ],
+            ]);
+
+            QmsStandardRequirement::updateOrCreate([
+                'qms_standard_id' => $standard->id,
+                'requirement_key' => $code . '-MAP-001',
+            ], [
+                'heading' => 'Internal controlled interpretation required',
+                'internal_interpretation' => 'Store organization-owned interpretation, controls and evidence links after authorized review.',
+                'controls' => ['Owner assigned', 'Evidence mapped', 'Audit criteria linked'],
+                'evidence' => ['Controlled document', 'Audit record', 'Action record'],
+                'mapped_documents' => ['DOC-HSE-001'],
+                'mapped_forms' => ['FORM-DOR-001'],
+                'mapped_risks' => ['RSK-2026-00031'],
+                'mapped_audits' => ['AUD-2026-00008'],
+                'mapped_actions' => ['ACT-2026-00118'],
+                'status' => 'Mapped',
+            ]);
+        }
+
+        $iso9001Future = QmsStandard::where('code', 'ISO-9001-2026')->first();
+        if ($iso9001Future) {
+            QmsComplianceChange::updateOrCreate(['reference' => 'CHG-STD-2026-00001'], [
+                'qms_standard_id' => $iso9001Future->id,
+                'change_type' => 'Edition transition',
+                'status' => 'Assessment required',
+                'summary' => 'Assess impact of the future ISO 9001 edition on internal controls, documents, forms, audits and training.',
+                'impacted_areas' => ['Documents', 'Forms', 'Audits', 'Training', 'Risk register'],
+                'actions_required' => ['Assign owner', 'Compare internal mappings', 'Create transition actions after publication'],
+                'due_date' => now()->addMonths(2)->toDateString(),
+            ]);
+        }
+
+        foreach ([
+            ['event-phase', 'ORG-2026', 'PHASE-TAXI', 'Taxi-out', 'Aviation phase taxonomy term for reporting forms.', 'ICAO/ADREP-compatible internal mapping', 'TAXI', ['cict_taxonomy' => 'event phase']],
+            ['event-phase', 'ORG-2026', 'PHASE-APPROACH', 'Approach', 'Aviation phase taxonomy term for reporting forms.', 'ICAO/ADREP-compatible internal mapping', 'APR', ['cict_taxonomy' => 'event phase']],
+            ['finding-type', 'ORG-2026', 'FINDING-NC', 'Nonconformity', 'Finding classification requiring evidence and criterion.', 'Organization', null, ['requires_ncr_review' => true]],
+            ['finding-type', 'ORG-2026', 'FINDING-OFI', 'Opportunity for Improvement', 'Improvement finding without automatic CAPA escalation.', 'Organization', null, ['automatic_capa' => false]],
+            ['root-cause-tool', 'ORG-2026', 'RCA-5WHY', '5 Whys', 'Reusable human-led investigation tool.', 'Organization', null, ['ai_may_suggest' => true, 'human_approval_required' => true]],
+            ['root-cause-tool', 'ORG-2026', 'RCA-SHELL', 'SHELL', 'Human-factors analysis structure for aviation safety.', 'Organization', null, ['blame_avoidance' => true]],
+        ] as [$taxonomy, $version, $code, $label, $description, $source, $externalCode, $mapping]) {
+            QmsTaxonomyTerm::updateOrCreate([
+                'taxonomy' => $taxonomy,
+                'taxonomy_version' => $version,
+                'code' => $code,
+            ], [
+                'label' => $label,
+                'description' => $description,
+                'source' => $source,
+                'external_code' => $externalCode,
+                'mapping' => $mapping,
+                'effective_from' => now()->startOfYear()->toDateString(),
+                'effective_to' => null,
+                'active' => true,
+            ]);
+        }
 
         $occurrence = QmsOccurrence::where('reference', 'QMS-2026-00435')->first();
         $action = QmsAction::where('reference', 'CAPA-2026-00077')->first();
@@ -596,6 +751,7 @@ class QmsPrototypeSeeder extends Seeder
             ['NUM-NCR', 'Non-Conformance', 'NCR'],
             ['NUM-AUD', 'Audits', 'AUD'],
             ['NUM-ACT', 'Actions', 'ACT'],
+            ['NUM-FBK', 'Feedback', 'FBK'],
         ] as [$code, $module, $prefix]) {
             QmsNumberingRule::updateOrCreate(['code' => $code], [
                 'module' => $module,
@@ -659,6 +815,37 @@ class QmsPrototypeSeeder extends Seeder
             'payload' => ['package' => 'CFG-BASELINE-001'],
             'attempts' => 0,
             'available_at' => now(),
+        ]);
+
+        QmsRecordSimilarity::updateOrCreate([
+            'source_reference' => 'REP-2026-000421',
+            'candidate_reference' => 'INC-2026-000183',
+        ], [
+            'score' => 88,
+            'matched_on' => ['location', 'type', 'narrative keywords'],
+            'decision' => 'Linked by reviewer',
+            'decided_by' => $admin?->id,
+            'decided_at' => now(),
+        ]);
+
+        QmsSafetyPromotion::updateOrCreate(['reference' => 'LESSON-2026-00003'], [
+            'title' => 'Temporary work zones need visible controls',
+            'source_reference' => 'QMS-2026-00435',
+            'deidentified_learning' => 'Teams should verify signage and barriers before temporary work starts, especially near active equipment routes.',
+            'audience' => ['Engineering', 'Ground Operations', 'HSE'],
+            'confidentiality_review' => 'Completed',
+            'approval_status' => 'Draft',
+            'published_at' => null,
+        ]);
+
+        QmsFeedbackItem::updateOrCreate(['reference' => 'FBK-2026-000900'], [
+            'user_id' => $admin?->id,
+            'context' => 'Reporter home',
+            'feedback_type' => 'Improvement idea',
+            'message' => 'Keep help and product feedback separate from safety reporting so users do not create the wrong record type.',
+            'status' => 'New',
+            'visibility' => 'Support',
+            'metadata' => ['separate_from_safety_reporting' => true],
         ]);
 
         foreach ([

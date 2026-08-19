@@ -40,7 +40,7 @@ class SeededUsersTest extends TestCase
 
         $this->get('/dashboard')
             ->assertOk()
-            ->assertSee('Command dashboard')
-            ->assertSee('Submit report');
+            ->assertSee('Role-aware home')
+            ->assertSee('Review reports');
     }
 }

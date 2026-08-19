@@ -18,6 +18,7 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Command dashboard');
+        $response->assertSee('Role-aware home');
+        $response->assertSee('What needs attention');
     }
 }

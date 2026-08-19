@@ -34,7 +34,10 @@ class Phase2CoreTest extends TestCase
 
         $response->assertRedirect('/');
         $this->assertAuthenticated();
-        $this->get('/dashboard')->assertOk()->assertSee('Command dashboard');
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Role-aware home')
+            ->assertSee('What needs attention');
     }
 
     public function test_authenticated_user_can_submit_report_for_screening(): void

@@ -1,16 +1,21 @@
 # QMS Implementation Status
 
-This Laravel prototype is aligned to and now visibly mapped against the BRSD in `docs/QMS_ysaidea_BRSD_and_Architecture_Blueprint.md`.
+This Laravel QMS implementation is aligned to the BRSD and the v7 complete redesign contract. The local working tree is the implementation source of truth.
 
-Implemented in the current prototype:
+Implemented in the current application:
 
-- Laravel QMS application shell
-- QMS dashboard route at `/dashboard`
-- QMS prototype Blade UI rebuilt from the BRSD form, workflow, record-workspace, and dashboard requirements
-- QMS occurrence submission endpoint
-- SQLite prototype database
-- QMS occurrence, action, investigation, audit, risk, and document models
-- Migrations and seed data
+- One coherent QMS product shell with role-aware top navigation, global search, create menu, Help, notifications, My Work, and progressive module disclosure
+- Reporter-only experience with Home, Report, My Reports, Notifications, and Help; reporter users do not see internal workflow, investigation, CAPA, internal comments, or administration
+- Central Reports workspace with report screening, comments, actions, attachments, related records, history, print, accept, and reject
+- Accepted reports create exactly one incident transactionally; rejected reports remain reporting records only
+- Independent incident numbering and reporting numbering
+- Occurrence, incident, action, investigation, risk, document, training, audit, compliance, objective, supplier, public report, admin, report designer, notification designer, workflow, and form designer foundations
+- Field assurance separation for audit, inspection, finding, NCR, CAPA, compliance change, safety promotion, and feedback records
+- Versioned standards registry and taxonomy registry storing internal mappings only; no licensed standards text is copied into the system
+- Safety promotion / lessons learned records separated from confidential safety reports
+- User feedback separated from safety reporting
+- Controlled AI governance records; AI remains blocked until a paid secured provider, permission model, source traceability, and human approval are enabled
+- Database migrations, rollback methods, seed data, and feature tests for the implemented business boundaries
 - Seeded demo users:
   - `admin@qms.test` / `password`
   - `yahya.alnaaimi@qms.test` / `Yahya@2026`
@@ -18,7 +23,12 @@ Implemented in the current prototype:
   - `aisha.albalushi@qms.test` / `Dummy@2026`
   - `omar.alharthy@qms.test` / `Dummy@2026`
 - Hostinger VPS deployment script template in `deploy/hostinger_publish_qms.sh`
+- Production runbook with `APP_DEBUG=false`, backup, deployment, queue worker, scheduler, and rollback requirements
 
-Important limitation:
+Remaining production dependencies:
 
-This is a first Laravel prototype, not the full enterprise QMS described in the BRSD. Authentication scaffolding, advanced authorization, workflow designer, form designer, AI governance, Microsoft Entra integration, and production hardening are still roadmap items.
+- Configure production database credentials on the VPS.
+- Run online Composer and npm audits from an environment with registry access.
+- Configure supervised queue workers and the scheduler on the VPS.
+- Connect real mail, SSO/Entra, integration APIs, backup storage, and approved secured AI provider credentials.
+- Complete UAT with real controlled procedures and organization-specific taxonomies before declaring regulated production go-live.

@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\QmsAction;
 use App\Models\QmsAiProvider;
 use App\Models\QmsAudit;
+use App\Models\QmsCapaCase;
+use App\Models\QmsComplianceChange;
 use App\Models\QmsConfigurationPackage;
 use App\Models\QmsDataSource;
 use App\Models\QmsDepartment;
 use App\Models\QmsDocument;
 use App\Models\QmsDomainPack;
 use App\Models\QmsFormDefinition;
+use App\Models\QmsFinding;
 use App\Models\QmsIncident;
+use App\Models\QmsInspection;
 use App\Models\QmsModuleLicense;
 use App\Models\QmsNumberingRule;
 use App\Models\QmsOfflineProfile;
@@ -21,12 +25,16 @@ use App\Models\QmsLocation;
 use App\Models\QmsManagementReview;
 use App\Models\QmsNotification;
 use App\Models\QmsObjective;
+use App\Models\QmsNonconformance;
 use App\Models\QmsOccurrence;
 use App\Models\QmsPublicReport;
 use App\Models\QmsRecordLink;
 use App\Models\QmsReport;
 use App\Models\QmsReportDesign;
 use App\Models\QmsRisk;
+use App\Models\QmsSafetyPromotion;
+use App\Models\QmsStandard;
+use App\Models\QmsTaxonomyTerm;
 use App\Models\QmsSupplier;
 use App\Models\QmsSyncAdapter;
 use App\Models\QmsSystemMonitor;
@@ -67,6 +75,11 @@ class DashboardController extends Controller
             QmsSystemMonitor::exists(),
             QmsRecordLink::exists(),
             QmsAiProvider::exists(),
+            QmsStandard::exists(),
+            QmsTaxonomyTerm::exists(),
+            QmsInspection::exists(),
+            QmsNonconformance::exists(),
+            QmsCapaCase::exists(),
         ];
         $auditReadiness = (int) round((collect($readinessChecks)->filter()->count() / count($readinessChecks)) * 100);
 
@@ -85,6 +98,10 @@ class DashboardController extends Controller
                 'publicReports' => QmsPublicReport::whereNotIn('status', ['Closed', 'Rejected'])->count(),
                 'trainingDue' => QmsTrainingRecord::where('expires_on', '<=', now()->addDays(45)->toDateString())->count(),
                 'supplierWatch' => QmsSupplier::whereIn('risk_rating', ['High', 'Critical'])->count(),
+                'openFindings' => QmsFinding::whereNotIn('status', ['Closed', 'Verified'])->count(),
+                'openNcr' => QmsNonconformance::whereNotIn('status', ['Closed', 'Verified'])->count(),
+                'openCapa' => QmsCapaCase::whereNotIn('status', ['Closed', 'Effective'])->count(),
+                'complianceChanges' => QmsComplianceChange::whereNotIn('status', ['Closed', 'Rejected'])->count(),
                 'objectivesWatch' => QmsObjective::whereIn('status', ['At risk', 'Off track'])->count(),
                 'reportDesigns' => QmsReportDesign::where('status', 'Published')->count(),
                 'notificationDesigns' => QmsNotificationDesign::where('status', 'Published')->count(),
@@ -103,6 +120,9 @@ class DashboardController extends Controller
             'publicReports' => QmsPublicReport::latest()->limit(4)->get(),
             'reports' => QmsReport::latest()->limit(4)->get(),
             'incidents' => QmsIncident::latest()->limit(4)->get(),
+            'inspections' => QmsInspection::latest()->limit(4)->get(),
+            'findings' => QmsFinding::latest()->limit(4)->get(),
+            'lessons' => QmsSafetyPromotion::latest()->limit(4)->get(),
         ]);
     }
 }

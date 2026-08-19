@@ -21,13 +21,13 @@ class Phase9DynamicFinalTest extends TestCase
 
         $this->get('/dashboard')
             ->assertOk()
-            ->assertSee('Live enterprise QMS')
+            ->assertSee('Role-aware home')
             ->assertSee('HSE Review')
             ->assertSee('Public intake')
             ->assertSee('Training due')
             ->assertSee('Supplier watch')
-            ->assertSee('ADMIN')
-            ->assertSee('FORMS');
+            ->assertSee('SHELL')
+            ->assertSee('ASSURE');
     }
 
     public function test_platform_admin_can_create_forms_workflows_and_saved_views(): void

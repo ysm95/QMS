@@ -9,6 +9,9 @@ use App\Http\Controllers\Qms\ComplianceController;
 use App\Http\Controllers\Qms\DashboardController;
 use App\Http\Controllers\Qms\DocumentController;
 use App\Http\Controllers\Qms\ExportController;
+use App\Http\Controllers\Qms\CapaController;
+use App\Http\Controllers\Qms\FeedbackController;
+use App\Http\Controllers\Qms\InspectionController;
 use App\Http\Controllers\Qms\IncidentController;
 use App\Http\Controllers\Qms\InvestigationController;
 use App\Http\Controllers\Qms\IntelligenceController;
@@ -19,9 +22,11 @@ use App\Http\Controllers\Qms\ObjectiveController;
 use App\Http\Controllers\Qms\ManagementReviewController;
 use App\Http\Controllers\Qms\PlatformController;
 use App\Http\Controllers\Qms\PublicReportController;
+use App\Http\Controllers\Qms\NonconformanceController;
 use App\Http\Controllers\Qms\ReporterController;
 use App\Http\Controllers\Qms\ReportingController;
 use App\Http\Controllers\Qms\RiskController;
+use App\Http\Controllers\Qms\SafetyPromotionController;
 use App\Http\Controllers\Qms\SearchController;
 use App\Http\Controllers\Qms\SupplierController;
 use App\Http\Controllers\Qms\TrainingController;
@@ -48,6 +53,8 @@ Route::post('/api/reporter/reports', [ReporterController::class, 'apiStore'])->n
 Route::middleware('auth')->group(function () {
     Route::get('/reporter/my-reports', [ReporterController::class, 'myReports'])->name('reporter.my-reports');
     Route::get('/reporter/notifications', [ReporterController::class, 'notifications'])->name('reporter.notifications');
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 });
 
 Route::middleware(['auth', 'internal.qms'])->group(function () {
@@ -82,6 +89,10 @@ Route::middleware(['auth', 'internal.qms'])->group(function () {
     Route::post('investigations/{investigation}/notes', [InvestigationController::class, 'storeNote'])->name('investigations.notes.store');
 
     Route::get('audits', [AuditController::class, 'index'])->name('audits.index');
+    Route::get('inspections', [InspectionController::class, 'index'])->name('inspections.index');
+    Route::get('nonconformances', [NonconformanceController::class, 'index'])->name('nonconformances.index');
+    Route::get('capa', [CapaController::class, 'index'])->name('capa.index');
+    Route::get('lessons-learned', [SafetyPromotionController::class, 'index'])->name('safety-promotions.index');
     Route::get('risks', [RiskController::class, 'index'])->name('risks.index');
     Route::patch('risks/{risk}', [RiskController::class, 'update'])->name('risks.update');
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');

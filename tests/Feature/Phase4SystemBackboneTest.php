@@ -27,7 +27,7 @@ class Phase4SystemBackboneTest extends TestCase
 
         $this->get('/compliance?search=SMS')
             ->assertOk()
-            ->assertSee('Compliance frameworks')
+            ->assertSee('Standards registry')
             ->assertSee('SMS-ICAO')
             ->assertSee('Safety assurance');
     }

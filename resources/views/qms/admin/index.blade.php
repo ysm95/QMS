@@ -38,7 +38,7 @@
 
   <div class="content-grid">
     <article class="panel wide">
-      <div class="panel-header"><h2>Production readiness</h2><span class="status-pill">BRSD v4</span></div>
+      <div class="panel-header"><h2>Production readiness</h2><span class="status-pill">v7</span></div>
       <div class="table-panel nested-table">
         <table>
           <thead><tr><th>Area</th><th>Status</th><th>Evidence</th></tr></thead>
@@ -88,7 +88,7 @@
 
   <div class="content-grid">
     <article class="panel wide">
-      <div class="panel-header"><h2>Users</h2><span class="status-pill">Search by %text%</span></div>
+      <div class="panel-header"><h2>Users</h2><span class="status-pill">Effective access starts here</span></div>
       <ul class="timeline">
         @forelse ($users as $user)
           <li><strong>{{ $user->name }}</strong><span>{{ $user->qms_role }} - {{ $user->email }} - {{ $user->job_title }}</span></li>

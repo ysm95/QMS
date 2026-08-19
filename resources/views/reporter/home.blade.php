@@ -36,6 +36,10 @@
       <a href="{{ route('reporter.my-reports') }}"><strong>My submitted reports</strong><span>Receipt history and public status</span></a>
     @endauth
     <div><strong>Drafts</strong><span>Mobile drafts stay on your device until submitted</span></div>
-    <div><strong>Help</strong><span>For urgent danger, use emergency channels first</span></div>
+    @auth
+      <a href="{{ route('feedback.index') }}"><strong>Help and feedback</strong><span>Feedback is separate from safety reporting</span></a>
+    @else
+      <div><strong>Help</strong><span>For urgent danger, use emergency channels first</span></div>
+    @endauth
   </section>
 @endsection
