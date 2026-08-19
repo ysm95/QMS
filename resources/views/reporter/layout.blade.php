@@ -20,13 +20,15 @@
   </main>
 
   <nav class="reporter-bottom-nav" aria-label="Reporter navigation">
+    <a href="{{ route('reporter.home') }}">Home</a>
     <a href="{{ route('reporter.home') }}">Report</a>
     @auth
       <a href="{{ route('reporter.my-reports') }}">My reports</a>
+      <a href="{{ route('reporter.notifications') }}">Notifications</a>
     @else
-      <span>Receipt only</span>
+      <span>My reports</span>
+      <span>Notifications</span>
     @endauth
-    <a href="#reporter-help">Help</a>
   </nav>
 </body>
 </html>

@@ -73,6 +73,19 @@ class ReporterController extends Controller
         ]);
     }
 
+    public function notifications(Request $request)
+    {
+        $reports = QmsPublicReport::query()
+            ->where('reporter_user_id', $request->user()->id)
+            ->whereNotNull('reporter_visible_messages')
+            ->latest()
+            ->paginate(12);
+
+        return view('reporter.notifications', [
+            'reports' => $reports,
+        ]);
+    }
+
     public function apiReportTypes(Request $request)
     {
         return response()->json([

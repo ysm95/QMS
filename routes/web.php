@@ -47,6 +47,7 @@ Route::post('/api/reporter/reports', [ReporterController::class, 'apiStore'])->n
 
 Route::middleware('auth')->group(function () {
     Route::get('/reporter/my-reports', [ReporterController::class, 'myReports'])->name('reporter.my-reports');
+    Route::get('/reporter/notifications', [ReporterController::class, 'notifications'])->name('reporter.notifications');
 });
 
 Route::middleware(['auth', 'internal.qms'])->group(function () {

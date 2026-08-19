@@ -105,6 +105,29 @@ button {
   color: #fff;
 }
 
+.nav-sublist {
+  display: grid;
+  gap: 2px;
+  padding: 2px 0 8px 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  margin-left: 12px;
+}
+
+.nav-sublist a {
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #9db1c3;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.nav-sublist a:hover,
+.nav-sublist a.active {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
 .sidebar-footer {
   margin-top: auto;
   padding: 12px;

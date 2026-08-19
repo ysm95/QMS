@@ -73,6 +73,17 @@ class QmsAdminControlCenter
     {
         return collect([
             [
+                'name' => 'People & Access',
+                'purpose' => 'Role templates, key-user assignments and scoped access control.',
+                'status' => $this->statusFromCounts(QmsPermissionTemplate::count(), QmsKeyUserAssignment::count(), QmsAccessScope::count()),
+                'route' => 'platform.index',
+                'items' => [
+                    'Permission templates' => QmsPermissionTemplate::where('status', 'Active')->count(),
+                    'Key users' => QmsKeyUserAssignment::where('status', 'Active')->count(),
+                    'Access scopes' => QmsAccessScope::where('status', 'Active')->count(),
+                ],
+            ],
+            [
                 'name' => 'Organization',
                 'purpose' => 'Departments, locations, active workforce and local master data.',
                 'status' => $this->statusFromCounts(QmsDepartment::count(), QmsLocation::count(), User::where('is_active', true)->count()),
@@ -84,18 +95,7 @@ class QmsAdminControlCenter
                 ],
             ],
             [
-                'name' => 'Identity & Access',
-                'purpose' => 'Role templates, key-user assignments and scoped access control.',
-                'status' => $this->statusFromCounts(QmsPermissionTemplate::count(), QmsKeyUserAssignment::count(), QmsAccessScope::count()),
-                'route' => 'platform.index',
-                'items' => [
-                    'Permission templates' => QmsPermissionTemplate::where('status', 'Active')->count(),
-                    'Key users' => QmsKeyUserAssignment::where('status', 'Active')->count(),
-                    'Access scopes' => QmsAccessScope::where('status', 'Active')->count(),
-                ],
-            ],
-            [
-                'name' => 'Platform Studios',
+                'name' => 'Forms & Processes',
                 'purpose' => 'Form builder, workflow builder, report designer and email designer.',
                 'status' => $this->statusFromCounts(QmsFormDefinition::count(), QmsWorkflowDefinition::count(), QmsReportDesign::count(), QmsEmailDesign::count()),
                 'route' => 'platform.index',
@@ -107,7 +107,19 @@ class QmsAdminControlCenter
                 ],
             ],
             [
-                'name' => 'Notification Designer',
+                'name' => 'Data & Reference',
+                'purpose' => 'Governed lookup sources, numbering, configuration packages and domain packs.',
+                'status' => $this->statusFromCounts(QmsDataSource::count(), QmsNumberingRule::count(), QmsConfigurationPackage::count()),
+                'route' => 'platform.index',
+                'items' => [
+                    'Data sources' => QmsDataSource::count(),
+                    'Numbering rules' => QmsNumberingRule::where('status', 'Active')->count(),
+                    'Config packages' => QmsConfigurationPackage::count(),
+                    'Domain packs' => QmsDomainPack::count(),
+                ],
+            ],
+            [
+                'name' => 'Communications',
                 'purpose' => 'Notification designs, templates, rules, groups and delivery evidence.',
                 'status' => $this->statusFromCounts(QmsNotificationDesign::count(), QmsNotificationTemplate::count(), QmsNotificationRule::count()),
                 'route' => 'platform.index',
@@ -120,52 +132,29 @@ class QmsAdminControlCenter
                 ],
             ],
             [
-                'name' => 'Data Management',
-                'purpose' => 'Governed lookup sources, numbering, configuration packages and domain packs.',
-                'status' => $this->statusFromCounts(QmsDataSource::count(), QmsNumberingRule::count(), QmsConfigurationPackage::count()),
+                'name' => 'Integrations',
+                'purpose' => 'Entra, reference data and integration health shown only when attention is needed.',
+                'status' => $this->statusFromCounts(QmsSyncAdapter::count(), QmsIntegrationEvent::count()),
                 'route' => 'platform.index',
                 'items' => [
-                    'Data sources' => QmsDataSource::count(),
-                    'Numbering rules' => QmsNumberingRule::where('status', 'Active')->count(),
-                    'Config packages' => QmsConfigurationPackage::count(),
-                    'Domain packs' => QmsDomainPack::count(),
-                ],
-            ],
-            [
-                'name' => 'Operations',
-                'purpose' => 'Sync adapters, offline profiles, integration events and production monitors.',
-                'status' => $this->statusFromCounts(QmsSystemMonitor::count(), QmsSyncAdapter::count(), QmsIntegrationEvent::count()),
-                'route' => 'platform.index',
-                'items' => [
-                    'System monitors' => QmsSystemMonitor::count(),
                     'Sync adapters' => QmsSyncAdapter::count(),
-                    'Offline profiles' => QmsOfflineProfile::count(),
                     'Integration events' => QmsIntegrationEvent::count(),
+                    'Offline profiles' => QmsOfflineProfile::count(),
                 ],
             ],
             [
-                'name' => 'Controlled AI',
-                'purpose' => 'Paid secured provider approval, entity-trained scope and AI audit trail.',
-                'status' => QmsAiProvider::where('is_approved', true)->where('is_enabled', true)->exists() ? 'Ready' : 'Blocked',
-                'route' => 'ai.index',
+                'name' => 'System',
+                'purpose' => 'System settings, monitors, audit trail, retention and controlled AI governance.',
+                'status' => $this->statusFromCounts(QmsSystemMonitor::count(), QmsSystemSetting::count(), QmsRetentionRule::count()),
+                'route' => 'platform.index',
                 'items' => [
-                    'Approved providers' => QmsAiProvider::where('is_approved', true)->count(),
-                    'Enabled providers' => QmsAiProvider::where('is_enabled', true)->count(),
-                    'Blocked providers' => QmsAiProvider::where(function (Builder $query) {
+                    'Settings' => QmsSystemSetting::count(),
+                    'System monitors' => QmsSystemMonitor::count(),
+                    'Retention rules' => QmsRetentionRule::where('status', 'Active')->count(),
+                    'AI blocked' => QmsAiProvider::where(function (Builder $query) {
                         $query->where('is_approved', false)->orWhere('is_enabled', false);
                     })->count(),
-                ],
-            ],
-            [
-                'name' => 'Governance',
-                'purpose' => 'Audit trail, signatures, attachments, retention and compliance evidence.',
-                'status' => $this->statusFromCounts(QmsRetentionRule::count(), QmsAttachment::count(), QmsElectronicSignature::count()),
-                'route' => 'intelligence.index',
-                'items' => [
                     'Audit logs' => QmsAuditLog::count(),
-                    'Signatures' => QmsElectronicSignature::count(),
-                    'Attachments' => QmsAttachment::count(),
-                    'Retention rules' => QmsRetentionRule::where('status', 'Active')->count(),
                 ],
             ],
         ]);

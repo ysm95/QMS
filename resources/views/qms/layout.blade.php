@@ -9,6 +9,49 @@
   <script defer src="{{ asset('qms-assets/studio.js') }}"></script>
 </head>
 <body>
+  @php
+    $role = auth()->user()->qms_role ?? 'QMS User';
+    $canAdmin = in_array($role, ['Super Admin', 'Quality Admin', 'Safety Admin'], true);
+    $navItems = [
+      ['label' => 'Home', 'route' => 'qms.dashboard', 'active' => ['qms.*']],
+      ['label' => 'My Work', 'route' => 'my-work.index', 'active' => ['my-work.*']],
+      ['label' => 'Reports', 'route' => 'reporting.index', 'active' => ['reporting.*', 'public-reports.*'], 'roles' => ['Super Admin', 'Safety Admin', 'Quality Admin', 'HSE Admin']],
+      ['label' => 'Safety', 'route' => 'incidents.index', 'active' => ['incidents.*', 'occurrences.*', 'actions.*', 'investigations.*', 'risks.*'], 'roles' => ['Super Admin', 'Safety Admin', 'HSE Admin', 'Action User']],
+      ['label' => 'Quality', 'route' => 'documents.index', 'active' => ['documents.*', 'objectives.*', 'training.*', 'suppliers.*'], 'roles' => ['Super Admin', 'Quality Admin']],
+      ['label' => 'Assurance', 'route' => 'audits.index', 'active' => ['audits.*', 'compliance.*', 'management-reviews.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin']],
+      ['label' => 'Analytics', 'route' => 'intelligence.index', 'active' => ['intelligence.*', 'search.*'], 'roles' => ['Super Admin', 'Quality Admin', 'Safety Admin', 'HSE Admin']],
+      ['label' => 'Administration', 'route' => 'admin.index', 'active' => ['admin.*', 'platform.*', 'ai.*'], 'admin' => true],
+    ];
+    $secondaryNav = [
+      'Reports' => [
+        ['Reporting workspace', 'reporting.index'],
+        ['Public intake', 'public-reports.index'],
+      ],
+      'Safety' => [
+        ['Incidents', 'incidents.index'],
+        ['Occurrences', 'occurrences.index'],
+        ['Actions', 'actions.index'],
+        ['Investigations', 'investigations.index'],
+        ['Risks', 'risks.index'],
+      ],
+      'Quality' => [
+        ['Documents', 'documents.index'],
+        ['Objectives', 'objectives.index'],
+        ['Training', 'training.index'],
+        ['Suppliers', 'suppliers.index'],
+      ],
+      'Assurance' => [
+        ['Audits', 'audits.index'],
+        ['Compliance', 'compliance.index'],
+        ['Management review', 'management-reviews.index'],
+      ],
+      'Administration' => [
+        ['Control center', 'admin.index'],
+        ['Configuration', 'platform.index'],
+        ['Controlled AI', 'ai.index'],
+      ],
+    ];
+  @endphp
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -16,27 +59,19 @@
         <div><strong>QMS</strong><span>qms.ysaidea.com</span></div>
       </div>
       <nav class="nav-list">
-        <a class="nav-item {{ request()->routeIs('qms.*') ? 'active' : '' }}" href="{{ route('qms.dashboard') }}">Dashboard</a>
-        <a class="nav-item {{ request()->routeIs('my-work.*') ? 'active' : '' }}" href="{{ route('my-work.index') }}">My Work</a>
-        <a class="nav-item {{ request()->routeIs('intelligence.*') ? 'active' : '' }}" href="{{ route('intelligence.index') }}">Intelligence</a>
-        <a class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}" href="{{ route('reporting.index') }}">Reporting</a>
-        <a class="nav-item {{ request()->routeIs('incidents.*') ? 'active' : '' }}" href="{{ route('incidents.index') }}">Incidents</a>
-        <a class="nav-item {{ request()->routeIs('occurrences.*') ? 'active' : '' }}" href="{{ route('occurrences.index') }}">Occurrences</a>
-        <a class="nav-item {{ request()->routeIs('actions.*') ? 'active' : '' }}" href="{{ route('actions.index') }}">CAPA / Actions</a>
-        <a class="nav-item {{ request()->routeIs('investigations.*') ? 'active' : '' }}" href="{{ route('investigations.index') }}">Investigations</a>
-        <a class="nav-item {{ request()->routeIs('audits.*') ? 'active' : '' }}" href="{{ route('audits.index') }}">Audits</a>
-        <a class="nav-item {{ request()->routeIs('risks.*') ? 'active' : '' }}" href="{{ route('risks.index') }}">Risks</a>
-        <a class="nav-item {{ request()->routeIs('documents.*') ? 'active' : '' }}" href="{{ route('documents.index') }}">Documents</a>
-        <a class="nav-item {{ request()->routeIs('compliance.*') ? 'active' : '' }}" href="{{ route('compliance.index') }}">Compliance</a>
-        <a class="nav-item {{ request()->routeIs('objectives.*') ? 'active' : '' }}" href="{{ route('objectives.index') }}">Objectives / SPI</a>
-        <a class="nav-item {{ request()->routeIs('management-reviews.*') ? 'active' : '' }}" href="{{ route('management-reviews.index') }}">Management Review</a>
-        <a class="nav-item {{ request()->routeIs('training.*') ? 'active' : '' }}" href="{{ route('training.index') }}">Training</a>
-        <a class="nav-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}" href="{{ route('suppliers.index') }}">Suppliers</a>
-        <a class="nav-item {{ request()->routeIs('public-reports.*') ? 'active' : '' }}" href="{{ route('public-reports.index') }}">Public Intake</a>
-        <a class="nav-item {{ request()->routeIs('platform.*') ? 'active' : '' }}" href="{{ route('platform.index') }}">Platform Config</a>
-        <a class="nav-item {{ request()->routeIs('ai.*') ? 'active' : '' }}" href="{{ route('ai.index') }}">Controlled AI</a>
-        <a class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">Notifications</a>
-        <a class="nav-item {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.index') }}">Admin Center</a>
+        @foreach ($navItems as $item)
+          @continue(($item['admin'] ?? false) && ! $canAdmin)
+          @continue(isset($item['roles']) && ! in_array($role, $item['roles'], true))
+          @php $isActive = collect($item['active'])->contains(fn ($pattern) => request()->routeIs($pattern)); @endphp
+          <a class="nav-item {{ $isActive ? 'active' : '' }}" href="{{ route($item['route']) }}">{{ $item['label'] }}</a>
+          @if ($isActive && isset($secondaryNav[$item['label']]))
+            <div class="nav-sublist">
+              @foreach ($secondaryNav[$item['label']] as [$label, $route])
+                <a class="{{ request()->routeIs(str_replace('.index', '.*', $route)) ? 'active' : '' }}" href="{{ route($route) }}">{{ $label }}</a>
+              @endforeach
+            </div>
+          @endif
+        @endforeach
       </nav>
       <div class="sidebar-footer">
         <span>{{ auth()->user()->qms_role ?? 'QMS User' }}</span>
@@ -53,8 +88,8 @@
           </form>
         </div>
         <div class="topbar-actions">
-          <a class="secondary-button" href="{{ route('notifications.index', ['status' => 'unread']) }}">Inbox</a>
-          <a class="primary-button" href="{{ route('reporting.index') }}">New report</a>
+          <a class="secondary-button" href="{{ route('notifications.index', ['status' => 'unread']) }}">Notifications</a>
+          <a class="primary-button" href="{{ route('reporting.index') }}">Report</a>
           <form method="POST" action="{{ route('logout') }}">@csrf<button class="secondary-button">Logout</button></form>
         </div>
       </header>

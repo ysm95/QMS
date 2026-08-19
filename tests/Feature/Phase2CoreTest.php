@@ -100,7 +100,8 @@ class Phase2CoreTest extends TestCase
 
         $this->get('/reporting')
             ->assertOk()
-            ->assertSee('Reporting desk')
+            ->assertSee('Central workspace')
+            ->assertSee('Report list')
             ->assertSee('Dispatch Occurrence Report')
             ->assertSee('Safety Confidential Report');
     }

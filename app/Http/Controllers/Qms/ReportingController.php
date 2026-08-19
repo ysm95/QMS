@@ -87,11 +87,37 @@ class ReportingController extends Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $reports = QmsReport::with('incident')->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $reports->where(function ($query) use ($search) {
+                $query->where('reference', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('reported_by', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $reports->where('status', $request->string('status'));
+        }
+
+        if ($request->filled('type')) {
+            $reports->where('type', $request->string('type'));
+        }
+
         return view('qms.reporting.index', [
             'reportTypes' => self::reportTypes(),
-            'reports' => QmsReport::with('incident')->latest()->paginate(10),
+            'reports' => $reports->paginate(10)->withQueryString(),
+            'activeFilters' => [
+                'search' => $request->string('search')->toString(),
+                'status' => $request->string('status')->toString(),
+                'type' => $request->string('type')->toString(),
+            ],
             'screeningCounts' => [
                 'submitted' => QmsReport::where('status', 'Submitted')->count(),
                 'returned' => QmsReport::where('status', 'Returned for Information')->count(),

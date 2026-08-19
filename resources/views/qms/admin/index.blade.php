@@ -1,14 +1,14 @@
-@extends('qms.layout', ['title' => 'Admin Center - QMS'])
+@extends('qms.layout', ['title' => 'Administration - QMS'])
 
 @section('content')
 <section class="view active-view">
   <div class="page-title">
     <div>
-      <p class="eyebrow">Administration / Control center</p>
-      <h1>Administration Control Center</h1>
+      <p class="eyebrow">Administration</p>
+      <h1>Control center</h1>
     </div>
     <div class="button-row">
-      <a class="secondary-button" href="{{ route('platform.index') }}">Platform Config</a>
+      <a class="secondary-button" href="{{ route('platform.index') }}">Configuration</a>
       <a class="secondary-button" href="{{ route('ai.index') }}">Controlled AI</a>
     </div>
   </div>
@@ -19,9 +19,9 @@
     @endforeach
   </div>
 
-  <div class="admin-workspace-grid">
+  <div class="admin-group-grid">
     @foreach ($workspaces as $workspace)
-      <a class="admin-workspace-card" href="{{ route($workspace['route']) }}">
+      <a class="admin-group-card" href="{{ route($workspace['route']) }}">
         <div class="panel-header">
           <h2>{{ $workspace['name'] }}</h2>
           <span class="status-pill {{ $workspace['status'] === 'Blocked' ? 'warning' : ($workspace['status'] === 'Ready' ? 'success' : '') }}">{{ $workspace['status'] }}</span>
