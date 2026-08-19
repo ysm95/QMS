@@ -36,6 +36,7 @@ use App\Models\QmsRecommendation;
 use App\Models\QmsReport;
 use App\Models\QmsRetentionRule;
 use App\Models\QmsReportDesign;
+use App\Models\QmsReportTypeRule;
 use App\Models\QmsRisk;
 use App\Models\QmsSavedView;
 use App\Models\QmsSupplier;
@@ -391,6 +392,31 @@ class QmsPrototypeSeeder extends Seeder
             'change_note' => 'Documented information lifecycle.',
         ]);
 
+        foreach (\App\Http\Controllers\Qms\ReportingController::reportTypes() as $key => $type) {
+            $reporterFacing = in_array($key, ['air-safety', 'ground-occurrence', 'hazard', 'confidential-safety'], true);
+            $publicFacing = in_array($key, ['ground-occurrence', 'hazard', 'confidential-safety'], true);
+
+            QmsReportTypeRule::updateOrCreate(['report_type_key' => $key], [
+                'title' => $type['title'],
+                'type' => $type['type'],
+                'module' => $type['module'],
+                'priority' => $type['priority'],
+                'description' => $type['description'],
+                'published' => true,
+                'requires_auth' => ! $publicFacing,
+                'supports_anonymous' => (bool) ($type['confidential'] ?? false) || $publicFacing,
+                'allowed_roles' => $reporterFacing
+                    ? array_values(array_filter(['Reporter', $publicFacing ? 'Public' : null, 'Safety Admin', 'Quality Admin', 'Super Admin']))
+                    : ['Safety Admin', 'Quality Admin', 'Super Admin'],
+                'allowed_departments' => [],
+                'form_version' => 1,
+                'effective_from' => now()->subDay()->toDateString(),
+                'effective_until' => null,
+                'sort_order' => $reporterFacing ? array_search($key, ['air-safety', 'ground-occurrence', 'hazard', 'confidential-safety'], true) + 10 : 100,
+                'status' => 'Active',
+            ]);
+        }
+
         QmsReportDesign::updateOrCreate(['code' => 'RPT-OCC-001'], [
             'name' => 'Occurrence Register and Risk Summary',
             'version' => 1,
@@ -593,6 +619,7 @@ class QmsPrototypeSeeder extends Seeder
             ['NUM-NCR', 'Non-Conformance', 'NCR'],
             ['NUM-AUD', 'Audits', 'AUD'],
             ['NUM-ACT', 'Actions', 'ACT'],
+            ['NUM-PUB', 'Reporter Intake', 'PUB'],
         ] as [$code, $module, $prefix]) {
             QmsNumberingRule::updateOrCreate(['code' => $code], [
                 'module' => $module,

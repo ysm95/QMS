@@ -19,6 +19,7 @@ use App\Http\Controllers\Qms\ObjectiveController;
 use App\Http\Controllers\Qms\ManagementReviewController;
 use App\Http\Controllers\Qms\PlatformController;
 use App\Http\Controllers\Qms\PublicReportController;
+use App\Http\Controllers\Qms\ReporterController;
 use App\Http\Controllers\Qms\ReportingController;
 use App\Http\Controllers\Qms\RiskController;
 use App\Http\Controllers\Qms\SearchController;
@@ -36,7 +37,19 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 Route::get('/portal/report', [PublicReportController::class, 'create'])->name('portal.report');
 Route::post('/portal/report', [PublicReportController::class, 'store'])->name('portal.report.store');
 
+Route::get('/reporter', [ReporterController::class, 'home'])->name('reporter.home');
+Route::get('/reporter/report/{reportType}', [ReporterController::class, 'create'])->name('reporter.create');
+Route::post('/reporter/report/{reportType}', [ReporterController::class, 'store'])->name('reporter.store');
+Route::get('/reporter/receipts/{token}', [ReporterController::class, 'receipt'])->name('reporter.receipt');
+Route::get('/api/reporter/report-types', [ReporterController::class, 'apiReportTypes'])->name('reporter.api.report-types');
+Route::post('/api/reporter/offline/validate', [ReporterController::class, 'apiValidateDraft'])->name('reporter.api.offline.validate');
+Route::post('/api/reporter/reports', [ReporterController::class, 'apiStore'])->name('reporter.api.store');
+
 Route::middleware('auth')->group(function () {
+    Route::get('/reporter/my-reports', [ReporterController::class, 'myReports'])->name('reporter.my-reports');
+});
+
+Route::middleware(['auth', 'internal.qms'])->group(function () {
     Route::get('/', DashboardController::class)->name('qms.dashboard');
     Route::get('/dashboard', DashboardController::class)->name('qms.dashboard.path');
     Route::get('/qms', DashboardController::class)->name('qms.index');
