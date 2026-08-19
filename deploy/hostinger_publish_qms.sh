@@ -88,6 +88,11 @@ mkdir -p "${SHARED}/storage"
 rm -rf storage
 ln -sfn "${SHARED}/storage" storage
 
+if grep -Eq '^APP_DEBUG=(true|TRUE|1)$' "${SHARED}/.env"; then
+  echo "APP_DEBUG must be false for production. Update ${SHARED}/.env and run again."
+  exit 1
+fi
+
 echo "Installing PHP dependencies..."
 composer install --no-dev --optimize-autoloader
 
@@ -97,11 +102,14 @@ npm run build
 
 echo "Optimizing Laravel..."
 php artisan key:generate --force
+php artisan optimize:clear
 php artisan migrate --force
+php artisan db:seed --class=QmsReporterProductSeeder --force
 php artisan storage:link || true
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan queue:restart || true
 
 echo "Switching current release..."
 ln -sfn "${RELEASE_PATH}" "${CURRENT}"
@@ -123,5 +131,9 @@ systemctl reload apache2 2>/dev/null || true
 systemctl restart "${PHP_FPM_SERVICE}" 2>/dev/null || true
 
 echo "Deployment complete: https://${DOMAIN}"
+echo "Queue worker required:"
+echo "  cd ${CURRENT} && php artisan queue:work --queue=default --sleep=3 --tries=3 --timeout=90"
+echo "Scheduler cron required:"
+echo "  * * * * * cd ${CURRENT} && php artisan schedule:run >> /dev/null 2>&1"
 echo "Rollback example:"
 echo "  ln -sfn <previous-release-path> ${CURRENT} && ln -sfn ${CURRENT}/public ${PUBLIC_HTML}"

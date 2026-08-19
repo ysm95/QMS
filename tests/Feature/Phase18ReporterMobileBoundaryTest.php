@@ -78,6 +78,46 @@ class Phase18ReporterMobileBoundaryTest extends TestCase
             ->assertDontSee('Reviewer');
     }
 
+    public function test_reporter_receipt_shows_only_reporter_visible_messages(): void
+    {
+        $this->seed();
+        $reporter = $this->reporterUser();
+
+        $report = QmsPublicReport::create([
+            'reference' => 'PUB-2026-777777',
+            'report_type_key' => 'hazard',
+            'reporter_user_id' => $reporter->id,
+            'category' => 'Hazard',
+            'location' => 'Hangar 2',
+            'anonymous' => false,
+            'confidential' => false,
+            'status' => 'New',
+            'public_status' => 'Information Required',
+            'receipt_token' => 'safe-receipt-token',
+            'form_version' => 1,
+            'description' => 'Reporter-facing summary.',
+            'submitted_payload' => ['report_type_title' => 'Hazard Reporting Form'],
+            'client_context' => [
+                'internal_comment' => 'Do not expose this internal note.',
+            ],
+            'reporter_visible_messages' => [
+                [
+                    'visibility' => 'REPORTER_VISIBLE',
+                    'message' => 'Please add the exact bay number.',
+                ],
+            ],
+        ]);
+
+        $this->actingAs($reporter)
+            ->get('/reporter/receipts/' . $report->receipt_token)
+            ->assertOk()
+            ->assertSee('Please add the exact bay number.')
+            ->assertDontSee('Do not expose this internal note.')
+            ->assertDontSee('internal_comment')
+            ->assertDontSee('Screening')
+            ->assertDontSee('Reviewer');
+    }
+
     public function test_reporter_mobile_api_returns_authorized_forms_without_internal_fields(): void
     {
         $this->seed();

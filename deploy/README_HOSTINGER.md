@@ -28,3 +28,34 @@ bash deploy/hostinger_publish_qms.sh
 ```
 
 The script backs up Miniworld files before switching the QMS domain public folder to Laravel `public`.
+
+Production requirements:
+
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL=https://qms.ysaidea.com`
+- `QUEUE_CONNECTION=database`
+- database credentials must be created before deployment
+
+Queue worker:
+
+```bash
+cd /home/your-hostinger-user/domains/qms.ysaidea.com/current
+php artisan queue:work --queue=default --sleep=3 --tries=3 --timeout=90
+```
+
+Scheduler cron:
+
+```bash
+* * * * * cd /home/your-hostinger-user/domains/qms.ysaidea.com/current && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Rollback:
+
+```bash
+ln -sfn /home/your-hostinger-user/domains/qms.ysaidea.com/releases/PREVIOUS_RELEASE /home/your-hostinger-user/domains/qms.ysaidea.com/current
+ln -sfn /home/your-hostinger-user/domains/qms.ysaidea.com/current/public /home/your-hostinger-user/domains/qms.ysaidea.com/public_html
+php artisan queue:restart
+sudo systemctl reload php8.4-fpm
+sudo systemctl reload nginx
+```
